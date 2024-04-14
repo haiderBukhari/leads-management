@@ -6,7 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import axios from "axios"
 import { toast } from 'react-toastify';
 
-export default function AssignLeadsDialog({ fetchData, setFetchData, open, setOpen, selectedLeads }) {
+export default function AssignLeadsDialog({ fetchData, setFetchData, open, setOpen, selectedLeads, setSelected }) {
     const [employeeData, setEmployeeData] = React.useState([]);
     const [close, setClose] = React.useState(true);
     const [searchTerm, setSearchTerm] = React.useState("");
@@ -26,7 +26,6 @@ export default function AssignLeadsDialog({ fetchData, setFetchData, open, setOp
                     'Content-Type': 'application/json',
                 },
             });
-            console.log(response.data);
             setEmployeeData(response.data);
             // setData(FinalData);
         } catch (err) {
@@ -65,6 +64,7 @@ export default function AssignLeadsDialog({ fetchData, setFetchData, open, setOp
                     theme: "light",
                 });
                 setFetchData(!fetchData)
+                setSelected([]);
             })
         } catch (error) {
             toast.error(error?.response?.data?.message, {

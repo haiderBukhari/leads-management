@@ -1,17 +1,20 @@
 import LeadsModel from "../Models/Leads.js";
 import LeadsStatus from './../Models/LeadsStatus.js';
+import Registration from "../Models/RegisterationModel.js";
 
 export const assignLead = async (req, res) => {
     try {
         const leads = req.body.leads;
+        const ownerInfo = await Registration.findOne({ _id: req.body.EmployeeID });
         for (const item of leads) {
-            const lead = await LeadsModel.findById(item.id);
+            const lead = await LeadsModel.findById(item);
             lead.isAssigned = true;
+            lead.ownerId = req.body.EmployeeID;
+            lead.ownerName = ownerInfo.name;
             lead.leadStatus.push({
                 message: 'Lead assigned successfully',
                 date: new Date()
             });
-            console.log(lead);
             await lead.save();
             await LeadsStatus.deleteMany({ leadID: item.id });
             await new LeadsStatus({

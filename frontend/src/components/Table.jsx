@@ -18,13 +18,14 @@ import axios from 'axios';
 import UploadLeadsDialog from './UploadDialog';
 import AssignLeadsDialog from './AssignLead';
 
-function createData(id, name, email, source, phone, date) {
+function createData(id, name, email, source, phone, owner, date) {
     return {
         id,
         name,
         email,
         source,
         phone,
+        owner,
         date
     };
 }
@@ -36,12 +37,12 @@ const headCells = [
         disablePadding: true,
         label: 'Full Name',
     },
-    {
-        id: 'email',
-        numeric: false,
-        disablePadding: false,
-        label: 'Email',
-    },
+    // {
+    //     id: 'email',
+    //     numeric: false,
+    //     disablePadding: false,
+    //     label: 'Email',
+    // },
     {
         id: 'source',
         numeric: false,
@@ -50,13 +51,19 @@ const headCells = [
     },
     {
         id: 'phone',
-        numeric: false,
+        numeric: true,
         disablePadding: false,
         label: 'Phone',
     },
     {
+        id: 'owner',
+        numeric: true,
+        disablePadding: false,
+        label: 'Owner',
+    },
+    {
         id: 'date',
-        numeric: false,
+        numeric: true,
         disablePadding: false,
         label: 'Assigned Date',
     },
@@ -122,7 +129,7 @@ function EnhancedTableHead(props) {
                 </TableCell>
                 {headCells.map((headCell, index) => (
                     <TableCell
-                        key={headCell.id + index*1009272 + 28287}
+                        key={headCell.id + index * 1009272 + 28287}
                         className="font-semibold"
                         align={headCell.numeric ? 'right' : 'left'}
                         padding={headCell.disablePadding ? 'none' : 'normal'}
@@ -209,13 +216,9 @@ export default function EnhancedTable({ open, setOpen }) {
     };
     const isSelected = (id) => selected.indexOf(id) !== -1;
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-    const visibleRows = React.useMemo(
-        () =>
-            stableSort(rows, getComparator(order, orderBy)).slice(
-                page * rowsPerPage,
-                page * rowsPerPage + rowsPerPage,
-            ),
-        [order, orderBy, page, rowsPerPage],
+    const visibleRows = stableSort(rows, getComparator(order, orderBy)).slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage,
     );
 
     useEffect(() => {
@@ -230,6 +233,7 @@ export default function EnhancedTable({ open, setOpen }) {
                         item.email,
                         item.source,
                         item.phone,
+                        item.ownerName,
                         item.createdAt,
                     )
                 );
@@ -321,7 +325,7 @@ export default function EnhancedTable({ open, setOpen }) {
                                         role="checkbox"
                                         aria-checked={isItemSelected}
                                         tabIndex={-1}
-                                        key={row.id + + index*100 + 287}
+                                        key={row.id + + index * 100 + 287}
                                         selected={isItemSelected}
                                         sx={{ cursor: 'default' }}
                                     >
@@ -346,9 +350,10 @@ export default function EnhancedTable({ open, setOpen }) {
                                         >
                                             {row.name}
                                         </TableCell>
-                                        <TableCell align="left">{row.email || '-'}</TableCell>
+                                        {/* <TableCell align="left">{row.email || '-'}</TableCell> */}
                                         <TableCell align="left" sx={{ lineHeight: '0.43' }} className='h-[20px]'>{row.source}</TableCell>
                                         <TableCell align="right">{row.phone}</TableCell>
+                                        <TableCell align="right">{row.owner}</TableCell>
                                         <TableCell align="right">{row?.date?.slice(0, 10)}</TableCell>
                                     </TableRow>
                                 );
@@ -376,7 +381,7 @@ export default function EnhancedTable({ open, setOpen }) {
                 />
             </Paper>
             <UploadLeadsDialog fetchData={fetchData} setFetchData={setFetchData} open={open} setOpen={setOpen} />
-            <AssignLeadsDialog fetchData={fetchData} setFetchData={setFetchData} open={open1} setOpen={setOpen1} selectedLeads={selected} />
+            <AssignLeadsDialog fetchData={fetchData} setFetchData={setFetchData} open={open1} setOpen={setOpen1} selectedLeads={selected} setSelected={setSelected} />
         </Box>
     );
 }

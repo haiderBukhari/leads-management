@@ -34,12 +34,11 @@ export const uploadLeads = async (req, res) => {
 };
 
 export const getLeads = async (req, res) => {
-    const {type} = req.query;
+    const { type } = req.query;
     const queries = {};
-    if(type === 'assigned')
-    {
+    if (type === 'assigned') {
         queries.isAssigned = true;
-    }else if(type==='unassigned'){
+    } else if (type === 'unassigned') {
         queries.isAssigned = false;
     }
     try {
@@ -62,6 +61,25 @@ export const getLeadsByEmployeeID = async (req, res) => {
 
         // Find all leads assigned to the specified employeeID
         const leads = await LeadsStatus.find({ EmployeeID: employeeID });
+
+        res.status(200).json(leads);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const getLeadsByID = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate if employeeID is provided
+        if (!id) {
+            return res.status(400).json({ message: 'id is required' });
+        }
+
+        // Find all leads assigned to the specified employeeID
+        const leads = await LeadsModel.findById(id);
 
         res.status(200).json(leads);
     } catch (err) {

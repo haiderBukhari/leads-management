@@ -22,6 +22,14 @@ const LeadsSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
+        ownerId: {
+            type: mongoose.Types.ObjectId,
+            ref: 'Registration',
+        },
+        ownerName: {
+            type: String,
+            default: ""
+        },
         leadStatus: [
             {
                 message: String,

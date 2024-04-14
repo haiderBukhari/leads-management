@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -11,9 +11,13 @@ import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import AttachEmailOutlinedIcon from '@mui/icons-material/AttachEmailOutlined';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import { useParams } from "react-router-dom"
+import axios from 'axios';
 
 const LeadsDetail = () => {
     const [showProperties, setShowProperties] = useState(true);
+    const [leadsData, setLeadData] = useState({});
+    let { id } = useParams();
     const data = [
         { "Owner": "Ashy Antony" },
         { "Lead Source": "xxxxx" },
@@ -36,7 +40,17 @@ const LeadsDetail = () => {
         { "Profile Verification Current Role": "" },
         { "Profile Verification Working Status": "" },
     ];
-
+    useEffect(() => {
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/leads/get/${id}`)
+            .then(response => {
+                const dataFromBackend = response.data;
+                console.log(dataFromBackend)
+                setLeadData(dataFromBackend)
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }, []);
     return (
         <div className="mt-10 mx-10 mb-10">
             <div>
@@ -46,16 +60,16 @@ const LeadsDetail = () => {
             <div className='flex flex-row'>
                 <div className='w-[40%]'>
                     <div className='mt-4 w-full'>
-                        <div className="max-w-[370px] w-full text-white px-2 py-4 bg-[#002C47]">
-                            <h1 className='ml-8 mt-2 text-xl'>Mudassir Ali</h1>
+                        <div className="max-w-[370px] w-full px-2 text-black py-4 bg-[#f4f4f4]" style={{ border: "1px solid #ccc" }}>
+                            <h1 className='ml-8 mt-2 text-xl'>{leadsData.name}</h1>
                             <h2 className='ml-8 mb-2 italic'>Cold</h2>
                             <div className='flex mt-4'>
                                 <EmailIcon />
-                                <p className='ml-2 text-sm'>apshaiderbukhari786@gmail.com</p>
+                                <p className='ml-2 text-sm'>{leadsData.email || '-'}</p>
                             </div>
                             <div className='flex mt-3'>
                                 <PhoneIcon />
-                                <p className='ml-2 text-sm'>+92 31-5109663</p>
+                                <p className='ml-2 text-sm'>{leadsData.phone}</p>
                             </div>
                             <div className='flex mt-3'>
                                 <LocationOnIcon />
@@ -111,31 +125,31 @@ const LeadsDetail = () => {
                     </div>
                 </div>
                 <div className='w-full ml-4'>
-                    <div className='w-full bg-[#002C47] flex items-center mt-4 h-[100px]'>
+                    <div className='w-full bg-[#f4f4f4] text-black flex items-center mt-4 h-[100px]' style={{ border: "1px solid #ccc" }}>
                         <div className='w-full flex items-center mx-6'>
-                            <div className="text-white w-[100px] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
+                            <div className="text-black flex items-center p-3 w-[auto] mx-3 bg-blue-400 text-white" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
                                 <LocalActivityOutlinedIcon className="mx-2" />
                                 Activity
                             </div>
-                            <div className="text-white w-[100px] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
+                            <div className="text-black flex items-center p-3 w-[auto] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
                                 <EditNoteOutlinedIcon className="mx-2" />
                                 Note
                             </div>
-                            <div className="text-white w-[100px] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
+                            <div className="text-black flex items-center p-3 w-[auto] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
                                 <AssignmentOutlinedIcon className="mx-2" />
                                 Task
                             </div>
-                            <div className="text-white w-[100px] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
+                            <div className="text-black flex items-center p-3 w-[auto] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
                                 <AttachEmailOutlinedIcon className="mx-2" />
                                 Email
                             </div>
-                            <div className="text-white w-[100px] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
+                            <div className="text-black flex items-center p-3 w-[auto] mx-3" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
                                 <AttachEmailOutlinedIcon className="mx-2" />
                                 Call
                             </div>
                         </div>
                     </div>
-                    <div className='flex h-[auto] justify-between mt-4 px-5 pt-3 cursor-pointer' style={{ border: "1px solid #ccc" }}>
+                    <div className='flex h-[auto] justify-between mt-4 px-5 pt-3 cursor-pointer'>
                         <div className='pb-3' style={{ borderBottom: "2px solid #0000ff" }}>Activity History</div>
                         <div className='pb-3'>Leads Details</div>
                         <div className='pb-3'>Task</div>
@@ -145,8 +159,8 @@ const LeadsDetail = () => {
                         <div className='pb-3'>Documents</div>
                     </div>
                     <div className='bg-gray-200 w-full h-auto px-5 pt-4 mb-10 pb-10'>
-                        <h1 className='text-sm text-gray-700'>Today</h1>
-                        <div className='bg-white w-[100%] h-[100px] mt-3 pt-4 pl-7 flex'>
+                        {/* <h1 className='text-sm text-gray-700'>Today</h1> */}
+                        {/* <div className='bg-white w-[100%] h-[100px] mt-3 pt-4 pl-7 flex'>
                             <div className='text-sm text-gray-700 leading-6'>
                                 <p>12 Apr</p>
                                 <p>07:56 pm</p>
@@ -161,11 +175,27 @@ const LeadsDetail = () => {
                                 </div>
                                 <p className='text-sm ml-6 mt-2'>Added by Hariharan R Son12/04/2024 07:56 PM</p>
                             </div>
-                        </div>
+                        </div> */}
                         {/*  */}
 
-                        <h1 className='text-sm text-gray-700 mt-5'>Yesterday</h1>
+                        <h1 className='text-sm text-gray-700 mt-5'>Today</h1>
                         <div className='bg-white w-[100%] h-[100px] mt-3 pt-4 pl-7 flex'>
+                            <div className='text-sm text-gray-700 leading-6'>
+                                <p>15 Apr</p>
+                                <p>00:20 am</p>
+                            </div>
+                            <div className="bg-blue-600 flex justify-center items-center w-[35px] h-[35px] rounded-full ml-5 relative">
+                                <TimelineIcon className='text-white' />
+                            </div>
+                            <div className='text-sm text-gray-700 leading-6 ml-5  flex flex-col'>
+                                <div className='flex'>
+                                    <KeyboardArrowRightIcon className="text-blue-600" />
+                                    <p className='text-blue-600 font-semibold'>Admin Assigned this lead to Haider</p>
+                                </div>
+                                <p className='text-sm ml-6 mt-2'>Added by System on 00:20 AM</p>
+                            </div>
+                        </div>
+                        {/* <div className='bg-white w-[100%] h-[100px] mt-3 pt-4 pl-7 flex'>
                             <div className='text-sm text-gray-700 leading-6'>
                                 <p>11 Apr</p>
                                 <p>03:56 pm</p>
@@ -180,25 +210,7 @@ const LeadsDetail = () => {
                                 </div>
                                 <p className='text-sm ml-6 mt-2'>Added by Hariharan R Son12/04/2024 07:56 PM</p>
                             </div>
-                        </div>
-                        <div className='bg-white w-[100%] h-[100px] mt-3 pt-4 pl-7 flex'>
-                            <div className='text-sm text-gray-700 leading-6'>
-                                <p>11 Apr</p>
-                                <p>03:56 pm</p>
-                            </div>
-                            <div className="bg-blue-600 flex justify-center items-center w-[35px] h-[35px] rounded-full ml-5 relative">
-                                <TimelineIcon className='text-white' />
-                            </div>
-                            <div className='text-sm text-gray-700 leading-6 ml-5  flex flex-col'>
-                                <div className='flex'>
-                                    <KeyboardArrowRightIcon className="text-blue-600" />
-                                    <p className='text-blue-600 font-semibold'>Call Attempt Activity</p>
-                                </div>
-                                <p className='text-sm ml-6 mt-2'>Added by Hariharan R Son12/04/2024 07:56 PM</p>
-                            </div>
-                        </div>
-
-
+                        </div> */}
                     </div>
                 </div>
             </div>
