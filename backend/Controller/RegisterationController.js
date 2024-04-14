@@ -80,9 +80,9 @@ export async function getAllEmployees(req, res) {
             default:
                 break;
         }
-        if(req.quer.find){
+        // if(req.quer.find){
             
-        }
+        // }
 
         const employees = await Registration.find(query);
         return res.status(200).json(employees);

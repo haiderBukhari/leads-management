@@ -27,7 +27,11 @@ const LeadsSchema = new mongoose.Schema(
                 message: String,
                 date: Date
             }
-        ]
+        ],
+        uploadedDate: {
+            type: Date,
+            default: Date.now
+        }
     },
     {
         timestamps: true,

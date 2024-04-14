@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,7 +13,10 @@ import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
 import Box from '@mui/material/Box';
 import SearchIcon from '@mui/icons-material/Search';
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import axios from 'axios';
+import UploadLeadsDialog from './UploadDialog';
+import AssignLeadsDialog from './AssignLead';
 
 function createData(id, name, email, source, phone, date) {
     return {
@@ -25,29 +28,6 @@ function createData(id, name, email, source, phone, date) {
         date
     };
 }
-
-const rows = [
-    createData(1, 'Cupcake', 'cupcake@example.com', 'Source A', '1234567890', Date.now()),
-    createData(2, 'Donut', 'donut@example.com', 'Source B', '9876543210', Date.now()),
-    createData(3, 'Eclair', 'eclair@example.com', 'Source C', '4567890123', Date.now()),
-    createData(4, 'Frozen yoghurt', 'frozen@example.com', 'Source D', '7890123456', Date.now()),
-    createData(5, 'Gingerbread', 'ginger@example.com', 'Source E', '2345678901', Date.now()),
-    createData(6, 'Cupcake', 'cupcake@example.com', 'Source A', '1234567890', Date.now()),
-    createData(7, 'Donut', 'donut@example.com', 'Source B', '9876543210', Date.now()),
-    createData(8, 'Eclair', 'eclair@example.com', 'Source C', '4567890123', Date.now()),
-    createData(9, 'Frozen yoghurt', 'frozen@example.com', 'Source D', '7890123456', Date.now()),
-    createData(10, 'Gingerbread', 'ginger@example.com', 'Source E', '2345678901', Date.now()),
-    createData(11, 'Cupcake', 'cupcake@example.com', 'Source A', '1234567890', Date.now()),
-    createData(12, 'Donut', 'donut@example.com', 'Source B', '9876543210', Date.now()),
-    createData(13, 'Eclair', 'eclair@example.com', 'Source C', '4567890123', Date.now()),
-    createData(14, 'Frozen yoghurt', 'frozen@example.com', 'Source D', '7890123456', Date.now()),
-    createData(15, 'Gingerbread', 'ginger@example.com', 'Source E', '2345678901', Date.now()),
-    createData(16, 'Cupcake', 'cupcake@example.com', 'Source A', '1234567890', Date.now()),
-    createData(17, 'Donut', 'donut@example.com', 'Source B', '9876543210', Date.now()),
-    createData(18, 'Eclair', 'eclair@example.com', 'Source C', '4567890123', Date.now()),
-    createData(19, 'Frozen yoghurt', 'frozen@example.com', 'Source D', '7890123456', Date.now()),
-    createData(20, 'Gingerbread', 'ginger@example.com', 'Source E', '2345678901', Date.now()),
-];
 
 const headCells = [
     {
@@ -70,13 +50,13 @@ const headCells = [
     },
     {
         id: 'phone',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Phone',
     },
     {
         id: 'date',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Assigned Date',
     },
@@ -140,9 +120,9 @@ function EnhancedTableHead(props) {
                         }}
                     />
                 </TableCell>
-                {headCells.map((headCell) => (
+                {headCells.map((headCell, index) => (
                     <TableCell
-                        key={headCell.id}
+                        key={headCell.id + index*1009272 + 28287}
                         className="font-semibold"
                         align={headCell.numeric ? 'right' : 'left'}
                         padding={headCell.disablePadding ? 'none' : 'normal'}
@@ -176,13 +156,16 @@ EnhancedTableHead.propTypes = {
     rowCount: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+export default function EnhancedTable({ open, setOpen }) {
     const Navigate = useNavigate();
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('name');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(50);
+    const [rows, setRows] = React.useState([]); // State to hold the rows of the table
+    const [open1, setOpen1] = React.useState(false);
+    const [fetchData, setFetchData] = React.useState(false);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -235,12 +218,47 @@ export default function EnhancedTable() {
         [order, orderBy, page, rowsPerPage],
     );
 
+    useEffect(() => {
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/leads`)
+            .then(response => {
+                const dataFromBackend = response.data;
+                console.log(dataFromBackend)
+                const formattedRows = dataFromBackend.map(item =>
+                    createData(
+                        item._id,
+                        item.name,
+                        item.email,
+                        item.source,
+                        item.phone,
+                        item.createdAt,
+                    )
+                );
+                setRows(formattedRows);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }, [fetchData]);
+
+
     return (
         <Box sx={{ width: "1200px", marginLeft: "10px" }}>
-            <div className='h-[40px] border-b-2 border-gray-300 flex items-start'>
-                <input type='text' placeholder='Search Lead' className='border-gray-300 pl-3' style={{border: "1px solid #ccc"}}/>
-                <SearchIcon className="bg-gray-300 text-gray-700 p-1"/>
+            <div className="flex justify-between mb-3">
+                <div className='h-[40px] border-gray-300 flex items-start'>
+                    <input type='text' placeholder='Search Lead' className='border-gray-300 pl-3' style={{ border: "1px solid #ccc" }} />
+                    <SearchIcon className="bg-gray-300 text-gray-700 p-1" />
+                </div>
+                <select onChange={(e) => {
+                    setOpen1(true);
+                    e.target.value = "";
+                }} className='bg-gray-200 px-2 h-[40px] outline-none'>
+                    <option value=''>Activity</option>
+                    <option value=''>Change Owner</option>
+                    <option value=''>Reset All Filters</option>
+                </select>
+
             </div>
+
             <div className='min-h-[40px] bg-gray-200 border-b-2 border-gray-300 flex items-center px-4 py-2 text-sm text-gray-700 justify-between'>
                 <div className='flex'>
                     <p className='mr-2'>Lead Stage</p>
@@ -274,7 +292,7 @@ export default function EnhancedTable() {
                 </div>
                 <div className='flex ml-4'>
                     <p className='mr-2'>Date Uploaded</p>
-                    <input className='outline-none cursor-pointer rounded-none' type="date"/>
+                    <input className='outline-none cursor-pointer rounded-none' type="date" />
                 </div>
             </div>
             <Paper sx={{ width: '100%', mb: 2 }}>
@@ -291,7 +309,7 @@ export default function EnhancedTable() {
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
+                            rowCount={rows?.length}
                         />
                         <TableBody>
                             {visibleRows.map((row, index) => {
@@ -303,7 +321,7 @@ export default function EnhancedTable() {
                                         role="checkbox"
                                         aria-checked={isItemSelected}
                                         tabIndex={-1}
-                                        key={row.id}
+                                        key={row.id + + index*100 + 287}
                                         selected={isItemSelected}
                                         sx={{ cursor: 'default' }}
                                     >
@@ -320,7 +338,7 @@ export default function EnhancedTable() {
                                         <TableCell
                                             component="th"
                                             id={labelId}
-                                            onClick={()=>{Navigate(`/LeadManagement/${row.id}`)}}
+                                            onClick={() => { Navigate(`/LeadManagement/${row.id}`) }}
                                             style={{ color: "red", textDecoration: "underline", textDecorationThickness: "1px", cursor: "pointer" }}
                                             className='text-red-800'
                                             scope="row"
@@ -328,10 +346,10 @@ export default function EnhancedTable() {
                                         >
                                             {row.name}
                                         </TableCell>
-                                        <TableCell align="left">{row.email}</TableCell>
-                                        <TableCell align="left" sx={{ color: sourceColors[row.source], fontWeight: "bold", lineHeight: '0.43' }} className='h-[20px]'>{row.source}</TableCell>
+                                        <TableCell align="left">{row.email || '-'}</TableCell>
+                                        <TableCell align="left" sx={{ lineHeight: '0.43' }} className='h-[20px]'>{row.source}</TableCell>
                                         <TableCell align="right">{row.phone}</TableCell>
-                                        <TableCell align="right">{new Date(row.date).toLocaleString().slice(0, 9)}</TableCell>
+                                        <TableCell align="right">{row?.date?.slice(0, 10)}</TableCell>
                                     </TableRow>
                                 );
                             })}
@@ -357,6 +375,8 @@ export default function EnhancedTable() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
+            <UploadLeadsDialog fetchData={fetchData} setFetchData={setFetchData} open={open} setOpen={setOpen} />
+            <AssignLeadsDialog fetchData={fetchData} setFetchData={setFetchData} open={open1} setOpen={setOpen1} selectedLeads={selected} />
         </Box>
     );
 }

@@ -282,7 +282,7 @@ export default function ManageUser() {
                                 multiple
                                 value={selectedColumns}
                                 onChange={handleColumnSelectChange}
-                                input={<Input />} // You can use any input component here, like Input from '@mui/material'
+                                input={<Input />}
                                 style={{ minWidth: 200 }}
                             >
                                 {headCells.map((column) => (
