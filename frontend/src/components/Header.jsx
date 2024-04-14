@@ -1,4 +1,3 @@
-import Logo from '../assets/logo.png';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import { Link } from 'react-router-dom';
 
@@ -6,7 +5,7 @@ const Header = () => {
     return (
         <div className="h-[60px] w-full bg-gray-800 flex justify-between items-center">
             <div className="px-4 py-2 w-full flex justify-between items-center relative">
-                <img className="h-[40px] mr-4" src={Logo} alt="Logo" />
+                <img className="h-[40px] mr-4" src='/assets/logo.png' alt="Logo" />
                 <div className="relative flex w-full justify-end">
                     <Link to="/LeadManagement" className='text-white mr-3'>Leads</Link>
                     <div style={{borderRight: "1px solid #ccc"}} className='mx-4'></div>
@@ -19,9 +18,9 @@ const Header = () => {
                                 <p className="text-gray-700">Status: Active</p>
                             </div>
                             <hr className="my-1" />
-                            <button className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 focus:outline-none">
+                            <Link to="/manage/users" className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 focus:outline-none">
                                 Manage User
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

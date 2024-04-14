@@ -1,7 +1,7 @@
 import express from 'express'
 import { v4 as uuidv4 } from 'uuid';
 import multer from 'multer'
-import { getAllEmployees, loginUser, RegisterUser } from '../Controller/RegisterationController.js';
+import { assignRoleToUsers, getAllEmployees, loginUser, RegisterUser } from '../Controller/RegisterationController.js';
 
 const RegisterationRoutes = express.Router();
 
@@ -21,4 +21,5 @@ const upload = multer({ storage });
 
 RegisterationRoutes.route('/').post(upload.single('file'), RegisterUser).get(loginUser);
 RegisterationRoutes.route('/employee').get(getAllEmployees);
+RegisterationRoutes.route('/role').post(assignRoleToUsers);
 export default RegisterationRoutes

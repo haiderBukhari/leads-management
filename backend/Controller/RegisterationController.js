@@ -13,8 +13,7 @@ export const RegisterUser = async (req, res) => {
         while(await Registration.findOne({userId: userId})){
             userId = 'STS' + Math.floor(Math.random() * 10000 + 1000)
         }
-        const name1 = req.body.name.toLowerCase();
-        const registration = await new Registration({
+        const registration = new Registration({
             userId: userId,
             password: password,
             name: req.body.name,
@@ -23,8 +22,6 @@ export const RegisterUser = async (req, res) => {
             qualification: req.body.qualification,
             address: req.body.address,
             file: req.file.filename,
-            isAdmin: name1.includes('admin'),
-            isEmployee: !name1.includes('admin')
         });
         await registration.save();
         SendEmail(req.body.email, req.body.name, userId, password);
@@ -40,16 +37,19 @@ export const loginUser = async (req, res) => {
         const { STSID, password } = req.query;
         const user = await Registration.findOne({ userId: STSID });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            throw new Error("User not found");
         }
         if (password !== user.password) {
-            return res.status(401).json({ message: 'Invalid password' });
+            throw new Error('Invalid password');
+        }
+        if(!user.isRoleAssigned){
+            throw new Error('Your role is pending to be verified from the admin');
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
         res.status(200).json({ message: 'Login successful', id: user._id, token: token, name: user.name, STSID: user.userId });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(400).json({ message: error.message });
     }
 };
 
@@ -57,7 +57,6 @@ export const loginUser = async (req, res) => {
 export async function getAllEmployees(req, res) {
     try {
         let query = { isAdmin: false };
-
         switch (req.query.type) {
             case 'generalManager':
                 query.isGeneralManager = true;
@@ -71,9 +70,51 @@ export async function getAllEmployees(req, res) {
             default:
                 break;
         }
+        switch (req.query.role) {
+            case 'unassigned':
+                query.isRoleAssigned = false;
+                break;
+            case 'assigned':
+                query.isRoleAssigned = true;
+                break;
+            default:
+                break;
+        }
+        if(req.quer.find){
+            
+        }
 
         const employees = await Registration.find(query);
         return res.status(200).json(employees);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export async function assignRoleToUsers(req, res) {
+    try {
+        const role = req.query.role;
+        const users = req.body.users;
+
+        for (const user of users) {
+            // Find the user by ID and update their role
+            switch (role) {
+                case 'generalManager':
+                    await Registration.findByIdAndUpdate(user, { isGeneralManager: true, isManager: false, isEmployee: false, isAdmin: false, isRoleAssigned: true });
+                    break;
+                case 'manager':
+                    await Registration.findByIdAndUpdate(user, { isGeneralManager: false, isManager: true, isAdmin: false, isEmployee: false, isRoleAssigned: true });
+                    break;
+                case 'employee':
+                    await Registration.findByIdAndUpdate(user, { isGeneralManager: false, isManager: false, isAdmin: false, isEmployee: true, isRoleAssigned: true });
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return res.status(200).json({ message: 'Role assigned successfully' });
     } catch (error) {
         console.error(error.message);
         return res.status(500).json({ message: 'Internal server error' });
