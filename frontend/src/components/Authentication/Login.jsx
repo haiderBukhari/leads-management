@@ -13,10 +13,12 @@ import Checkbox from '@mui/material/Checkbox';
 import axios from "axios"
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-// import { useDispatch } from "react-redux"
+import { useDispatch } from "react-redux"
+import { registerUser } from '../../store/features/AuthenticationSlice';
+import { failedToast, successToast } from '../../utils/ToastsNotifications';
 
 export default function Login() {
-    // const dispatch = useDispatch();
+    const dispatch = useDispatch();
     const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
     const [stsID, setSTSID] = useState("");
     const [password, setPassword] = useState("");
@@ -43,36 +45,25 @@ export default function Login() {
                     userID: response.data.id
                 }));
             }
-
             const email = response.data.name.toLowerCase();
-            console.log(email)
+            dispatch(registerUser({
+                userId: response.data.id,
+                stsID: response.data.STSID,
+                name: response.data.name,
+                jwtToken: response.data.token,
+                isAdmin: response.data.isAdmin,
+                isGeneralManager: response.data.isGeneralManager,
+                isManager: response.data.isManager,
+                isEmployee: response.data.isEmployee,
+            }))
             if (email.includes('admin')) {
                 Navigate('/LeadManagement');
             } else {
                 Navigate('/LeadManagement');
             }
-
-            toast.success('Login successfully!', {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            successToast('Login successfully!')
         } catch (error) {
-            toast.error(error?.response?.data?.message, {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            failedToast(error?.response?.data?.message)
         }
     };
 

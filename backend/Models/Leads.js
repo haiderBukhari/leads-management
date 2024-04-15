@@ -22,11 +22,35 @@ const LeadsSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
-        ownerId: {
+        //ownerId: {
+        //    type: mongoose.Types.ObjectId,
+        //    ref: 'Registration',
+        //},
+        //ownerName: {
+        //    type: String,
+        //    default: ""
+        //},
+        generalManagerID: {
             type: mongoose.Types.ObjectId,
             ref: 'Registration',
         },
-        ownerName: {
+        generalManagerName: {
+            type: String,
+            default: ""
+        },
+        managerID: {
+            type: mongoose.Types.ObjectId,
+            ref: 'Registration',
+        },
+        managerName: {
+            type: String,
+            default: ""
+        },
+        employeeID: {
+            type: mongoose.Types.ObjectId,
+            ref: 'Registration',
+        },
+        employeeName: {
             type: String,
             default: ""
         },

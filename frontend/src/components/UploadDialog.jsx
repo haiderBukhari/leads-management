@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import axios from "axios"
-import { toast } from 'react-toastify';
+import { failedToast, successToast } from '../utils/ToastsNotifications';
 
 export default function UploadLeadsDialog({ fetchData, setFetchData, open, setOpen }) {
     const [file, setFile] = React.useState(null);
@@ -26,36 +26,19 @@ export default function UploadLeadsDialog({ fetchData, setFetchData, open, setOp
 
         const formData = new FormData();
         formData.append('file', file);
-
         try {
             await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/leads`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             }).then(() => {
-                toast.success('Leads Uploaded!', {
-                    position: "top-center",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                });
-                setFetchData(!fetchData)
+                successToast('Leads Uploaded!')
+                setTimeout(() => {
+                    setFetchData(!fetchData);
+                }, 1000);
             })
         } catch (error) {
-            toast.error(error?.response?.data?.message, {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            failedToast(error?.response?.data?.message)
         }
     };
 

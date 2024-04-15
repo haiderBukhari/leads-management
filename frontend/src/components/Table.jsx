@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom"
 import axios from 'axios';
 import UploadLeadsDialog from './UploadDialog';
 import AssignLeadsDialog from './AssignLead';
+import { useSelector } from 'react-redux';
 
 function createData(id, name, email, source, phone, owner, date) {
     return {
@@ -173,6 +174,7 @@ export default function EnhancedTable({ open, setOpen }) {
     const [rows, setRows] = React.useState([]); // State to hold the rows of the table
     const [open1, setOpen1] = React.useState(false);
     const [fetchData, setFetchData] = React.useState(false);
+    const jwtToken = useSelector((state) => state.authentication.jwtToken);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -222,10 +224,13 @@ export default function EnhancedTable({ open, setOpen }) {
     );
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/leads`)
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/leads`, {
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`
+            }
+        })
             .then(response => {
                 const dataFromBackend = response.data;
-                console.log(dataFromBackend)
                 const formattedRows = dataFromBackend.map(item =>
                     createData(
                         item._id,
@@ -233,7 +238,7 @@ export default function EnhancedTable({ open, setOpen }) {
                         item.email,
                         item.source,
                         item.phone,
-                        item.ownerName,
+                        item.generalManagerName ? item.generalManagerName : item.managerName ? item.managerName : item.employeeName ? item.employeeName : '-' ,
                         item.createdAt,
                     )
                 );

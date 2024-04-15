@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import axios from "axios"
-import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { failedToast, successToast } from '../../utils/ToastsNotifications';
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -58,28 +58,9 @@ export default function Register() {
                 },
             });
             Navigate('/login');
-            toast.success('Registered successfully! Check your Email!', {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            successToast('Registered successfully! Check your Email!')
         } catch (error) {
-            toast.error(error?.response?.data?.message, {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
-            // Handle error if necessary
+            failedToast(error?.response?.data?.message)
         }
     };
 

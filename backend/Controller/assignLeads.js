@@ -9,8 +9,16 @@ export const assignLead = async (req, res) => {
         for (const item of leads) {
             const lead = await LeadsModel.findById(item);
             lead.isAssigned = true;
-            lead.ownerId = req.body.EmployeeID;
-            lead.ownerName = ownerInfo.name;
+            if(ownerInfo.isGeneralManager){
+                lead.generalManagerID = ownerInfo._id;
+                lead.generalManagerName = ownerInfo.name;
+            }else if(ownerInfo.isManager){
+                lead.managerID = ownerInfo._id;
+                lead.managerName = ownerInfo.name;
+            }else{
+                lead.employeeID = ownerInfo._id;
+                lead.employeeName = ownerInfo.name;
+            }
             lead.leadStatus.push({
                 message: 'Lead assigned successfully',
                 date: new Date()

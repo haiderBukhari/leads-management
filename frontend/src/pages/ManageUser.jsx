@@ -17,12 +17,14 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
-// import { Link, useNavigate } from "react-router-dom"
 import { Input } from '@mui/material';
 import RoleSelectionDialog from '../components/UserType';
+import { failedToast, successToast } from '../utils/ToastsNotifications';
+import AssignOwnerDialog from '../components/AssignOwner';
+import { useSelector } from 'react-redux';
 
-function createData(id, name, email, phone, qualification, address, document) {
-    return { id, name, email, phone, qualification, address, document };
+function createData(id, name, email, phone, qualification, address, role, owner, document) {
+    return { id, name, email, phone, qualification, address, role, owner, document };
 }
 const headCells = [
     {
@@ -54,6 +56,18 @@ const headCells = [
         numeric: true,
         disablePadding: false,
         label: 'Qualification',
+    },
+    {
+        id: 'role',
+        numeric: true,
+        disablePadding: false,
+        label: 'Role',
+    },
+    {
+        id: 'owner',
+        numeric: true,
+        disablePadding: false,
+        label: 'Owner',
     },
     {
         id: 'document',
@@ -168,20 +182,29 @@ EnhancedTableHead.propTypes = {
 
 export default function ManageUser() {
     // const Navigate = useNavigate();
-    const [selectedColumns, setSelectedColumns] = useState(['name', 'email', 'phone', 'address', 'qualification', 'document']);
+    const [selectedColumns, setSelectedColumns] = useState(['name', 'email', 'phone', 'address', 'qualification', 'role', 'owner', 'document']);
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('name');
     const [selected, setSelected] = React.useState([]);
+    const [selectedFull, setSelectedFull] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(50);
     const [rows, setRows] = useState([]); // State to hold the rows of the table
     const [fetchData, setFetchData] = useState(false);
     const [open, setOpen] = useState(false);
-    const [role, setRole] = useState("unassigned");
+    const [open1, setOpen1] = useState(false);
+    const [role, setRole] = useState("all");
     const [type, setType] = useState("all");
+    const [ownerType, setOwnerType] = useState('');
+    const jwtToken = useSelector((state) => state.authentication.jwtToken);
+    const userDetails = useSelector((state) => state.authentication);
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/register/employee?type=${type}&role=${role}`)
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/register/employee?type=${type}&role=${role}`, {
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`
+            }
+        })
             .then(response => {
                 const dataFromBackend = response.data;
                 const formattedRows = dataFromBackend.map(item =>
@@ -192,6 +215,8 @@ export default function ManageUser() {
                         item.contactNumber,
                         item.qualification,
                         item.address,
+                        item.isGeneralManager ? 'General Manager' : item.isManager ? 'Manager' : item.isEmployee ? 'Employee' : '-',
+                        item.isGeneralManager ? '-' : item.isManager ? item.generalManagerName : item.isEmployee ? item.managerName ?? item.generalManagerName : '-',
                         item.file
                     )
                 );
@@ -207,6 +232,8 @@ export default function ManageUser() {
             .then(() => {
                 setFetchData(!fetchData);
                 setSelected([])
+                setSelectedFull([])
+                successToast('Role Assigned!')
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
@@ -222,28 +249,39 @@ export default function ManageUser() {
         if (event.target.checked) {
             const newSelected = rows.map((n) => n.id);
             setSelected(newSelected);
+            setSelectedFull(rows);
             return;
         }
         setSelected([]);
+        setSelectedFull([])
     };
 
-    const handleClick = (event, id) => {
-        const selectedIndex = selected.indexOf(id);
+    const handleClick = (event, row) => {
+        const selectedIndex = selected.indexOf(row.id);
         let newSelected = [];
-
+        let newSelectedtemp = [];
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
+            newSelected = newSelected.concat(selected, row.id);
+            newSelectedtemp = newSelectedtemp.concat(selectedFull, row);
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
+            newSelectedtemp = newSelectedtemp.concat(selectedFull.slice(1));
         } else if (selectedIndex === selected.length - 1) {
             newSelected = newSelected.concat(selected.slice(0, -1));
+            newSelectedtemp = newSelectedtemp.concat(selectedFull.slice(0, -1));
         } else if (selectedIndex > 0) {
             newSelected = newSelected.concat(
                 selected.slice(0, selectedIndex),
                 selected.slice(selectedIndex + 1),
             );
+            newSelectedtemp = newSelectedtemp.concat(
+                selectedFull.slice(0, selectedIndex),
+                selectedFull.slice(selectedIndex + 1),
+            );
         }
         setSelected(newSelected);
+        setSelectedFull(newSelectedtemp);
+        //setSelectedFull
     };
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -294,12 +332,39 @@ export default function ManageUser() {
                         </FormControl>
                     </div>
                     <select onChange={(e) => {
-                        setOpen(true);
+                        if (e.target.value === 'role') {
+                            if (!selected.length) {
+                                e.target.value = "";
+                                return failedToast("Select Users to Change/Assign there Role");
+                            }
+                            setOpen(true);
+                        } else if (e.target.value === 'owner') {
+                            if (!selected.length) {
+                                e.target.value = "";
+                                return failedToast("Select Users to Change/Assign Owner");
+                            }
+                            const temprole = selectedFull[0].role;
+                            for (const users of selectedFull) {
+                                if(!userDetails.isAdmin){
+                                    if(users.role === userDetails.isGeneralManager ? "General Manager" : userDetails.isManager ? 'Manager' : userDetails.isEmployee ? 'Employee' : ''){
+                                        return failedToast(`You dont have permission to assign ${users.role}`);
+                                    }
+                                }
+                                else if (users.role !== temprole) {
+                                    e.target.value = "";
+                                    return failedToast("Select the users with the same role");
+                                }
+                            }
+                            setOwnerType(temprole);
+                            setOpen1(!open1);
+                        }
                         e.target.value = "";
-                    }} className='bg-gray-200 px-2 h-[40px] outline-none'>
+                    }} className='bg-gray-200 max-w-[140px] px-2 h-[40px] outline-none'>
                         <option value=''>Activity</option>
-                        <option value=''>Assign Role</option>
-                        <option value=''>Change Role</option>
+                        {
+                            userDetails.isAdmin && <option value='role'>Assign/ Change Role</option>
+                        }
+                        <option value='owner'>Assign/ Change Owner</option>
                     </select>
                 </div>
             </div>
@@ -310,9 +375,9 @@ export default function ManageUser() {
                         setRole(e.target.value);
                         setFetchData(!fetchData);
                     }} className='outline-none cursor-pointer rounded-none'>
-                        <option value='all' key=''>All</option>
+                        <option value='all' key='' selected>All</option>
                         <option value='assigned' key=''>Role Assigned</option>
-                        <option value='unassigned' key='' selected>Role Unassigned</option>
+                        <option value='unassigned' key=''>Role Unassigned</option>
                     </select>
                 </div>
                 <div className='flex mt-4 md:ml-4 md:mt-0'>
@@ -363,7 +428,7 @@ export default function ManageUser() {
                                             <Checkbox
                                                 color="primary"
                                                 checked={isItemSelected}
-                                                onClick={(event) => handleClick(event, row.id)}
+                                                onClick={(event) => handleClick(event, row)}
                                                 inputProps={{
                                                     'aria-labelledby': labelId,
                                                 }}
@@ -401,6 +466,10 @@ export default function ManageUser() {
                                                         return <TableCell key={column.id} align="right">{row.address}</TableCell>;
                                                     case 'qualification':
                                                         return <TableCell key={column.id} align="right">{row.qualification}</TableCell>;
+                                                    case 'role':
+                                                        return <TableCell key={column.id} align="right">{row.role}</TableCell>;
+                                                    case 'owner':
+                                                        return <TableCell key={column.id} align="right">{row.owner}</TableCell>;
                                                     case 'document':
                                                         return (
                                                             <TableCell key={column.id} align="right">
@@ -449,6 +518,7 @@ export default function ManageUser() {
                 />
             </Paper>
             <RoleSelectionDialog open={open} setOpen={setOpen} AssignRole={AssignRole} />
+            <AssignOwnerDialog fetchData={fetchData} setFetchData={setFetchData} open={open1} setOpen={setOpen1} selectedLeads={selected} setSelected={setSelected} type={ownerType} />
         </Box>
         // </div>
     );

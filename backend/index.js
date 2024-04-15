@@ -5,6 +5,7 @@ import { config } from 'dotenv';
 import connectDB from './config/dbConnection.js';
 import RegisterationRoutes from './Routes/Registerationroutes.js';
 import LeadsRoutes from './Routes/LeadsRoutes.js';
+import { validateUser } from './Middlewares/validateUser.js';
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(morgan('dev'))
 config();
 
+app.use(validateUser)
 app.use('/api/register', RegisterationRoutes)
 app.use('/api/leads', LeadsRoutes)
 

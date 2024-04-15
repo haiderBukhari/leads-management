@@ -4,13 +4,13 @@ import { SendEmail } from "../utils/SendEmail.js";
 
 export const RegisterUser = async (req, res) => {
     try {
-        const tempData = await Registration.findOne({email: req.body.email});
-        if(tempData){
+        const tempData = await Registration.findOne({ email: req.body.email });
+        if (tempData) {
             return res.status(400).json({ message: 'User already exists' });
         }
         const password = Math.random().toString(36).slice(-8);
         let userId = 'STS' + Math.floor(Math.random() * 10000 + 1000)
-        while(await Registration.findOne({userId: userId})){
+        while (await Registration.findOne({ userId: userId })) {
             userId = 'STS' + Math.floor(Math.random() * 10000 + 1000)
         }
         const registration = new Registration({
@@ -42,11 +42,11 @@ export const loginUser = async (req, res) => {
         if (password !== user.password) {
             throw new Error('Invalid password');
         }
-        if(!user.isRoleAssigned){
+        if (!user.isRoleAssigned) {
             throw new Error('Your role is pending to be verified from the admin');
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
-        res.status(200).json({ message: 'Login successful', id: user._id, token: token, name: user.name, STSID: user.userId });
+        res.status(200).json({ message: 'Login successful', id: user._id, token: token, name: user.name, STSID: user.userId, isAdmin: user.isAdmin, isManager: user.isManager, isGeneralManager: user.isGeneralManager, isEmployee: user.isEmployee });
     } catch (error) {
         console.error(error.message);
         res.status(400).json({ message: error.message });
@@ -57,6 +57,9 @@ export const loginUser = async (req, res) => {
 export async function getAllEmployees(req, res) {
     try {
         let query = { isAdmin: false };
+        if (!req.validationData.isAdmin) {
+            query.$or = [{ generalManagerID: req.validationData._id }, { managerID: req.validationData._id }, { employeeID: req.validationData._id }];
+        }
         switch (req.query.type) {
             case 'generalManager':
                 query.isGeneralManager = true;
@@ -81,7 +84,7 @@ export async function getAllEmployees(req, res) {
                 break;
         }
         // if(req.quer.find){
-            
+
         // }
 
         const employees = await Registration.find(query);
@@ -115,6 +118,36 @@ export async function assignRoleToUsers(req, res) {
         }
 
         return res.status(200).json({ message: 'Role assigned successfully' });
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export async function assignManagerToUser(req, res) {
+    try {
+        const users = req.body.users;
+
+        for (const user of users) {
+            await Registration.findByIdAndUpdate(user, { managerID: req.query.managerID, managerName: req.query.managerName });
+        }
+
+        return res.status(200).json({ message: 'Manager Assigned' });
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export async function assignGeneralManagerToUser(req, res) {
+    try {
+        const users = req.body.users;
+
+        for (const user of users) {
+            await Registration.findByIdAndUpdate(user, { generalManagerID: req.query.managerID, generalManagerName: req.query.managerName });
+        }
+
+        return res.status(200).json({ message: 'Manager Assigned' });
     } catch (error) {
         console.error(error.message);
         return res.status(500).json({ message: 'Internal server error' });

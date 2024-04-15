@@ -36,6 +36,9 @@ export const uploadLeads = async (req, res) => {
 export const getLeads = async (req, res) => {
     const { type } = req.query;
     const queries = {};
+    if(!req.validationData.isAdmin){
+        queries.$or = [{ generalManagerID: req.validationData._id }, { managerID: req.validationData._id }, { employeeID: req.validationData._id }];
+    }
     if (type === 'assigned') {
         queries.isAssigned = true;
     } else if (type === 'unassigned') {

@@ -55,6 +55,20 @@ const registrationSchema = new mongoose.Schema(
         isEmployee: {
             type: Boolean,
             default: false
+        },
+        generalManagerID: {
+            type: mongoose.Types.ObjectId,
+        },
+        generalManagerName: {
+            type: String,
+            default: ""
+        },
+        managerID: {
+            type: mongoose.Types.ObjectId,
+        },
+        managerName: {
+            type: String,
+            default: ""
         }
     },
     {
