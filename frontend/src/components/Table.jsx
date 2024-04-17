@@ -175,6 +175,7 @@ export default function EnhancedTable({ open, setOpen }) {
     const [open1, setOpen1] = React.useState(false);
     const [fetchData, setFetchData] = React.useState(false);
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
+    const data = useSelector((state) => state.authentication);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -238,7 +239,7 @@ export default function EnhancedTable({ open, setOpen }) {
                         item.email,
                         item.source,
                         item.phone,
-                        item.generalManagerName ? item.generalManagerName : item.managerName ? item.managerName : item.employeeName ? item.employeeName : '-' ,
+                        item.employeeName ? item.employeeName : item.managerName ? item.managerName : item.generalManagerName ? item.generalManagerName : '-',
                         item.createdAt,
                     )
                 );
@@ -257,15 +258,16 @@ export default function EnhancedTable({ open, setOpen }) {
                     <input type='text' placeholder='Search Lead' className='border-gray-300 pl-3' style={{ border: "1px solid #ccc" }} />
                     <SearchIcon className="bg-gray-300 text-gray-700 p-1" />
                 </div>
-                <select onChange={(e) => {
-                    setOpen1(true);
-                    e.target.value = "";
-                }} className='bg-gray-200 px-2 h-[40px] outline-none'>
-                    <option value=''>Activity</option>
-                    <option value=''>Change Owner</option>
-                    <option value=''>Reset All Filters</option>
-                </select>
-
+                {
+                    !data.isEmployee && <select onChange={(e) => {
+                        setOpen1(true);
+                        e.target.value = "";
+                    }} className='bg-gray-200 px-2 h-[40px] outline-none'>
+                        <option value=''>Activity</option>
+                        <option value='owner'>Change Owner</option>
+                        <option value=''>Reset All Filters</option>
+                    </select>
+                }
             </div>
 
             <div className='min-h-[40px] bg-gray-200 border-b-2 border-gray-300 flex items-center px-4 py-2 text-sm text-gray-700 justify-between'>

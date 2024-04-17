@@ -3,24 +3,39 @@ import LeadsStatus from './../Models/LeadsStatus.js';
 import Registration from "../Models/RegisterationModel.js";
 
 export const assignLead = async (req, res) => {
+    const getMessage = (item, employee) => {
+        const owner = item.employeeName ? item.employeeName : item.managerName ? item.managerName : item.generalManagerName ? item.generalManagerName : '-';
+        if (owner === '-') {
+            return `Lead is assigned to ${employee.name}.`
+        } else {
+            return `Lead owner is changed from ${owner} to ${employee.name}. `
+        }
+    }
     try {
         const leads = req.body.leads;
         const ownerInfo = await Registration.findOne({ _id: req.body.EmployeeID });
         for (const item of leads) {
             const lead = await LeadsModel.findById(item);
+            const message = getMessage(lead, ownerInfo)
             lead.isAssigned = true;
-            if(ownerInfo.isGeneralManager){
+            if (ownerInfo.isGeneralManager) {
                 lead.generalManagerID = ownerInfo._id;
                 lead.generalManagerName = ownerInfo.name;
-            }else if(ownerInfo.isManager){
+                lead.managerID = null,
+                    lead.managerName = '',
+                    lead.employeeID = null,
+                    lead.employeeName = ''
+            } else if (ownerInfo.isManager) {
                 lead.managerID = ownerInfo._id;
                 lead.managerName = ownerInfo.name;
-            }else{
+                lead.employeeID = null,
+                    lead.employeeName = ''
+            } else {
                 lead.employeeID = ownerInfo._id;
                 lead.employeeName = ownerInfo.name;
             }
-            lead.leadStatus.push({
-                message: 'Lead assigned successfully',
+            lead.leadStatus.unshift({
+                message: message,
                 date: new Date()
             });
             await lead.save();
@@ -88,3 +103,57 @@ export const getLeadsLimit = async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 };
+
+
+export const addNote = async (req, res) => {
+    try {
+        const { leadId } = req.query;
+        const { message } = req.body;
+
+        const lead = await LeadsModel.findById(leadId);
+
+        if (!lead) {
+            return res.status(404).json({ message: 'Lead not found' });
+        }
+
+        lead.notes.unshift({
+            message,
+            date: new Date()
+        });
+
+        await lead.save();
+
+        res.status(200).json({ message: 'Note added successfully' });
+    } catch (err) {
+        console.log(err.message);
+        res.status(400).json({ message: err.message });
+    }
+};
+
+export const updateLead = async (req, res) => {
+    try {
+        const { leadId } = req.params;
+        const lead = await LeadsModel.findByIdAndUpdate(leadId, req.body, { new: true });
+        return res.status(200).json(lead);
+    } catch (err) {
+        console.log(err.message);
+        res.status(400).json({ message: err.message });
+    }
+}
+
+export const uploadFile = async (req, res) => {
+    try {
+        const { leadId } = req.params;
+        const lead = await LeadsModel.findById(leadId);
+        lead.documents.unshift({
+            message: req.file.path,
+            date: new Date()
+        });
+        await lead.save();
+        res.status(200).json({ message: 'File uploaded successfully' });
+
+    } catch (err) {
+        console.log(err.message);
+        res.status(400).json({ message: err.message });
+    }
+}

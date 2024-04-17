@@ -22,14 +22,34 @@ const LeadsSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
-        //ownerId: {
-        //    type: mongoose.Types.ObjectId,
-        //    ref: 'Registration',
-        //},
-        //ownerName: {
-        //    type: String,
-        //    default: ""
-        //},
+        interestedProjects: {
+            type: String,
+            default: ''
+        },
+        bugdet: {
+            type: String,
+            default: ''
+        },
+        address: {
+            type: String,
+            default: ''
+        },
+        meetingDate: {
+            type: Date,
+            default: null
+        },
+        meetingTime: {
+            type: String,
+            default: ""
+        },
+        leadScore: {
+            type: Number,
+            default: 0
+        },
+        stage: {
+            type: String,
+            default: 'new'
+        },
         generalManagerID: {
             type: mongoose.Types.ObjectId,
             ref: 'Registration',
@@ -55,6 +75,18 @@ const LeadsSchema = new mongoose.Schema(
             default: ""
         },
         leadStatus: [
+            {
+                message: String,
+                date: Date
+            }
+        ],
+        notes: [
+            {
+                message: String,
+                date: Date
+            }
+        ],
+        documents: [
             {
                 message: String,
                 date: Date

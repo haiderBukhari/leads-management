@@ -8,6 +8,7 @@ const Header = () => {
     const Navigate = useNavigate();
     const disptch = useDispatch();
     const userDetails = useSelector((state) => state.authentication);
+    const data = useSelector((state) => state.authentication);
     return (
         <div className="h-[60px] w-full bg-gray-800 flex justify-between items-center">
             <div className="px-4 py-2 w-full flex justify-between items-center relative">
@@ -23,9 +24,11 @@ const Header = () => {
                                 <p className="text-gray-700">Status: Active</p>
                             </div>
                             <hr className="my-1" />
-                            <Link to="/manage/users" className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 focus:outline-none">
+                            {
+                                !data.isEmployee && <Link to="/manage/users" className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 focus:outline-none">
                                 Manage User
                             </Link>
+                            }
                             <div onClick={()=>{
                                 disptch(logoutUser());
                                 Navigate('/')

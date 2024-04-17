@@ -11,6 +11,7 @@ export default function AssignLeadsDialog({ fetchData, setFetchData, open, setOp
     const [employeeData, setEmployeeData] = React.useState([]);
     const [close, setClose] = React.useState(true);
     const [searchTerm, setSearchTerm] = React.useState("");
+    const data = useSelector((state) => state.authentication);
 
     const handleClose = () => {
         setOpen(false);
@@ -81,22 +82,26 @@ export default function AssignLeadsDialog({ fetchData, setFetchData, open, setOp
                                 Choose from which of the following you want to assign Leads.
                             </DialogContentText>
                             <div className="container mx-auto p-6">
-                                <div className="flex items-center justify-between role cursor-pointer" onClick={() => { fetchEmployees("generalManager") }}>
-                                    <div className="flex items-center">
-                                        <div className="text-lg font-semibold">General Manager</div>
+                                {
+                                    data.isAdmin && <div className="flex items-center justify-between role cursor-pointer" onClick={() => { fetchEmployees("generalManager") }}>
+                                        <div className="flex items-center">
+                                            <div className="text-lg font-semibold">General Manager</div>
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </div>
-                                <div className="flex items-center justify-between role cursor-pointer mt-5 " onClick={() => { fetchEmployees("manager") }}>
-                                    <div className="flex items-center">
-                                        <div className="text-lg font-semibold">Manager</div>
+                                }
+                                {
+                                    data.isGeneralManager || data.isAdmin && <div className="flex items-center justify-between role cursor-pointer mt-5 " onClick={() => { fetchEmployees("manager") }}>
+                                        <div className="flex items-center">
+                                            <div className="text-lg font-semibold">Manager</div>
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </div>
+                                }
                                 <div className="flex items-center justify-between role cursor-pointer mt-5" onClick={() => { fetchEmployees("employee") }}>
                                     <div className="flex items-center">
                                         <div className="text-lg font-semibold">Employee</div>
@@ -110,7 +115,6 @@ export default function AssignLeadsDialog({ fetchData, setFetchData, open, setOp
                             <DialogContentText id="alert-dialog-description">
                                 Choose from which of the following Peoples you want to assign Leads.
                             </DialogContentText>
-
                             <input
                                 type="text"
                                 placeholder="Search by name"
