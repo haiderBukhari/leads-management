@@ -18,6 +18,8 @@ import axios from 'axios';
 import UploadLeadsDialog from './UploadDialog';
 import AssignLeadsDialog from './AssignLead';
 import { useSelector } from 'react-redux';
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
+import AdvanceSearchDialog from './AdvanceSearch';
 
 function createData(id, name, email, source, phone, owner, date) {
     return {
@@ -69,15 +71,6 @@ const headCells = [
         label: 'Assigned Date',
     },
 ];
-
-// Define a mapping of source names to background colors
-const sourceColors = {
-    'Source A': '#9C27B0', // Example color for Source A
-    'Source B': '#E57373', // Example color for Source B
-    'Source C': '#4CAF50', // Example color for Source C
-    'Source D': '#64B5F6', // Example color for Source D
-    'Source E': '#EF9A9A', // Example color for Source E
-};
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -173,6 +166,7 @@ export default function EnhancedTable({ open, setOpen }) {
     const [rowsPerPage, setRowsPerPage] = React.useState(50);
     const [rows, setRows] = React.useState([]); // State to hold the rows of the table
     const [open1, setOpen1] = React.useState(false);
+    const [open2, setOpen2] = React.useState(false);
     const [fetchData, setFetchData] = React.useState(false);
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
     const data = useSelector((state) => state.authentication);
@@ -254,9 +248,15 @@ export default function EnhancedTable({ open, setOpen }) {
     return (
         <Box sx={{ width: "1200px", marginLeft: "10px" }}>
             <div className="flex justify-between mb-3">
-                <div className='h-[40px] border-gray-300 flex items-start'>
-                    <input type='text' placeholder='Search Lead' className='border-gray-300 pl-3' style={{ border: "1px solid #ccc" }} />
-                    <SearchIcon className="bg-gray-300 text-gray-700 p-1" />
+                <div className="flex items-center">
+                    <div className='h-[auto] mr-6 border-gray-300 flex items-center'>
+                        <input type='text' placeholder='Search Lead' className='border-gray-300 rounded-md px-3 py-1 outline-none' style={{ border: "1px solid #ccc" }} />
+                        <SearchIcon className="bg-gray-200 text-gray-700 h-[100%]" />
+                    </div>
+                    <div onClick={()=>{setOpen2(!open2)}} className='flex bg-slate-200 h-[auto] cursor-pointer hover:bg-slate-100 rounded-md px-3 py-2'>
+                        <p className='text-sm mr-3'>Advance Search</p>
+                        <ManageSearchIcon/>
+                    </div>
                 </div>
                 {
                     !data.isEmployee && <select onChange={(e) => {
@@ -389,6 +389,7 @@ export default function EnhancedTable({ open, setOpen }) {
             </Paper>
             <UploadLeadsDialog fetchData={fetchData} setFetchData={setFetchData} open={open} setOpen={setOpen} />
             <AssignLeadsDialog fetchData={fetchData} setFetchData={setFetchData} open={open1} setOpen={setOpen1} selectedLeads={selected} setSelected={setSelected} />
+            <AdvanceSearchDialog fetchData={fetchData} setFetchData={setFetchData} open={open2} setOpen={setOpen2}/>
         </Box>
     );
 }
