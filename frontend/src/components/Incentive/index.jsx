@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import PersonIcon from '@mui/icons-material/Person';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AddIcon from '@mui/icons-material/Add';
-import ProductivityDialog from './Dialog';
+import IncentiveFilterationDialog from './Dialog';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import ProductivityTable from '../ProductivityTable';
@@ -60,22 +60,18 @@ const Index = () => {
 
     return (
         <div className="w-full bg-white pb-5 px-2" style={{ borderTop: "2px solid blue" }}>
-            <div className='mt-3 flex justify-between px-2'>
-                <div>
-                    <button onClick={() => { setChange(!change) }} className={`${change ? 'bg-green-600 text-white' : 'bg-gray-300 text-black'} shadow-md  py-[0] px-3 h-[30px]`}>FOS</button>
-                    <button onClick={() => { setChange(!change) }} className={`${change ? 'bg-gray-300 text-black' : 'bg-green-600 text-white'} shadow-sm text-black py-[0] px-3 h-[30px]`}>Leader</button>
-                </div>
+            <div className='mt-3 flex justify-start px-2'>
                 <div className='flex items-end h-full py-3 px-2 justify-end'>
-                    <button onClick={() => { setOpen(!open); }} className="bg-yellow-600 rounded-md text-white py-[0] px-3 h-[30px]"><AddIcon className="px-1" /> Columns</button>
+                    <button onClick={() => { setOpen(!open); }} className="bg-yellow-600 rounded-md text-white py-[0] px-3 h-[30px]"><AddIcon className="px-1" /> Advance Filters</button>
                 </div>
             </div>
             <div className='flex justify-between items-end'>
                 <div className="w-full flex items-center bg-white py-3 px-2">
                     <div>
-                        <p className="text-sm mb-1">Employee Name/Code</p>
+                        <p className="text-sm mb-1">Lead Name/ID</p>
                         <div className='flex items-center'>
                             <PersonIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
-                            <input type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} value={searchTerm} onChange={handleSearchInputChange}
+                            <input type='text' placeholder='Select Lead' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} value={searchTerm} onChange={handleSearchInputChange}
                             />
                             {showOptions && (
                                 <ul
@@ -95,31 +91,45 @@ const Index = () => {
                             )}
                         </div>
                     </div>
-                    <div className='mx-8'>
-                        <p className="text-sm mb-1">Lead Type</p>
+                    <div className='ml-8 flex-1'>
+                        <p className="text-sm mb-1">Segment</p>
                         <div className='flex items-center'>
                             <LocationOnIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
-                            <select type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
-                                <option selected disabled>Select Lead Type</option>
-                                <option value="Hot">Hot</option>
-                                <option value="Cold">Cold</option>
-                                <option value="Warm">Warm</option>
+                            <select type='text' placeholder='Select Segment' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
+                                <option selected disabled>Select Segment</option>
+                                <option value="Primary">Primary</option>
+                                <option value="Secondary">Secondary</option>
                             </select>
                         </div>
                     </div>
-                    <div className='mr-8'>
-                        <p className="text-sm mb-1">Date</p>
+                    <div className='flex-1'>
+                        <p className="text-sm mb-1">Deal Closure Date</p>
                         <div className='flex items-center'>
-                            <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
-                            <button className="bg-gray-300 text-gray-700 px-3 py-[0.8px]">To</button>
                             <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
                         </div>
                     </div>
-                    <div className='mr-8 flex-1'>
-                        <p className="text-sm mb-1">Presets</p>
-                        <select type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[100%]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
-                            <option selected disabled>Presets</option>
-                        </select>
+                    <div className='flex-1'>
+                        <p className="text-sm mb-1">Channel</p>
+                        <div className='flex items-center'>
+                            <LocationOnIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
+                            <select type='text' placeholder='Select Channel' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
+                                <option selected disabled>Select Channel</option>
+                                <option value="Direct">Direct</option>
+                                <option value="Other Brokerage">Other Brokerage</option>
+                                <option value="Referral">Referral</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className='flex-1'>
+                        <p className="text-sm mb-1">Sale Type</p>
+                        <div className='flex items-center'>
+                            <LocationOnIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
+                            <select type='text' placeholder='Select Sale Type' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
+                                <option selected disabled>Select Sale Type</option>
+                                <option value="Self">Self</option>
+                                <option value="Assisted By Leader">Assisted By Leader</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
                     </div>
@@ -128,7 +138,7 @@ const Index = () => {
                     <button className="bg-blue-600 rounded-md text-white py-[0] px-3 h-[30px]">Filter</button>
                 </div>
             </div>
-            <ProductivityDialog open={open} setOpen={setOpen} show={show} setShow={setShow} />
+            <IncentiveFilterationDialog open={open} setOpen={setOpen} show={show} setShow={setShow} />
             { show && <ProductivityTable/> }
         </div>
     )

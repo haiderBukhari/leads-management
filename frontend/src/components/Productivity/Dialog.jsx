@@ -5,7 +5,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button, DialogActions, IconButton } from '@mui/material';
 
-export default function ProductivityDialog({ open, setOpen }) {
+export default function ProductivityDialog({ open, setOpen, show, setShow }) {
     const handleClose = () => {
         setOpen(false);
     };
@@ -136,7 +136,7 @@ export default function ProductivityDialog({ open, setOpen }) {
             </div>
             <DialogActions>
                 <Button onClick={() => { setOpen(false) }}>Close</Button>
-                <Button onClick={() => { setOpen(false) }} autoFocus>
+                <Button onClick={() => { setOpen(false); setShow(true) }} autoFocus>
                     Create
                 </Button>
             </DialogActions>
