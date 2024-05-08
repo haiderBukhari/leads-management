@@ -18,12 +18,14 @@ import axios from 'axios';
 import NoteDialog from '../components/LeadsDetails/NotesDialog';
 import { useSelector } from 'react-redux';
 import { failedToast, successToast } from '../utils/ToastsNotifications';
+import ActivityDialog from '../components/CreateActivity';
 
 const LeadsDetail = () => {
     const [showProperties, setShowProperties] = useState(true);
     const [leadsData, setLeadData] = useState({});
     const [selectedData, setSelectedData] = useState(0);
     const [addNote, setAddNote] = useState(false);
+    const [addActivity, setAddActivity] = useState(false);
     const [fetchData, setFetchData] = useState(false);
     const [editMode, setEditMode] = useState(false);
     let { id } = useParams();
@@ -49,7 +51,6 @@ const LeadsDetail = () => {
             failedToast(error?.response?.data?.message)
         }
     };
-
 
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/leads/get/${id}`)
@@ -207,7 +208,7 @@ const LeadsDetail = () => {
                 <div className='w-full ml-4'>
                     <div className='w-full bg-[#f4f4f4] text-black flex items-center mt-4 h-[100px]' style={{ border: "1px solid #ccc" }}>
                         <div className='w-full flex items-center mx-6'>
-                            <div className="text-black flex items-center p-3 w-[auto] mx-3 bg-blue-400 text-white" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
+                            <div onClick={()=>{setAddActivity(!addActivity)}} className="flex items-center p-3 w-[auto] mx-3 text-black hover:opacity-50 cursor-pointer" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
                                 <LocalActivityOutlinedIcon className="mx-2" />
                                 Activity
                             </div>
@@ -362,6 +363,8 @@ const LeadsDetail = () => {
                 </div>
             </div>
             <NoteDialog fetchData={fetchData} setFetchData={setFetchData} open={addNote} setOpen={setAddNote} selectedLead={leadsData} />
+            <ActivityDialog
+             fetchData={fetchData} setFetchData={setFetchData} open={addActivity} setOpen={setAddActivity} selectedLead={leadsData} />
         </div>
     )
 }

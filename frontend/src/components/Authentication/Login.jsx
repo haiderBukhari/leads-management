@@ -69,7 +69,7 @@ export default function Login() {
 
     return (
         <div>
-            <div className='flex justify-center items-center pr-3 md:px-7 md:pt-10'>
+            <div className='flex justify-center items-center pr-3 md:px-7 md:pt-10 bg-white'>
                 <div className='bg-gray-100 w-[50%] py-10 hidden md:flex md:justify-center rounded-2xl'>
                     <img className='w-[63%] h-[auto] rounded-3xl' src='/assets/login.png' alt="login" />
                 </div>

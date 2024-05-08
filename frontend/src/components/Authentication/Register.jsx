@@ -65,7 +65,7 @@ export default function Register() {
     };
 
     return (
-        <div>
+        <div className='bg-white'>
             <div className='flex justify-center items-center pr-3 md:px-7 md:pt-10'>
                 <div className='flex-1 text-gray-700 w-[40%] ml-3 md:mr-10'>
                     <img className='w-[70%] h-[auto] rounded-3xl mb-10 pt-5 md:hidden' src='/assets/logo.png' alt="logo" />

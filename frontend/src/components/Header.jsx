@@ -14,6 +14,7 @@ const Header = () => {
             <div className="px-4 py-2 w-full flex justify-between items-center relative">
                 <img className="h-[40px] mr-4" src='/assets/logo.png' alt="Logo" />
                 <div className="relative flex w-full justify-end">
+                    <Link to="/performance" className='text-white mr-3'>Performance Dashboard</Link>
                     <Link to="/incentive" className='text-white mr-3'>Incentive Dashboard</Link>
                     <Link to="/productivty" className='text-white mr-3'>Productivity Dashboard</Link>
                     <Link to="/LeadManagement" className='text-white mr-3'>Leads Dashboard</Link>

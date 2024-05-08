@@ -12,10 +12,6 @@ export default function AdvanceSearchDialog({ fetchData, setFetchData, open, set
     const [searchTerm, setSearchTerm] = React.useState("Lead Activity");
     const [secondarySearchTerm, setsecondarySearchTerm] = React.useState("");
     const [IsPresent, setIsPresent] = React.useState("Is");
-    // const [message, setMessage] = React.useState("");
-    // const [filteredOptions, setFilteredOptions] = React.useState([]);
-    // const [showOptions, setShowOptions] = React.useState(false);
-    // const jwtToken = useSelector((state) => state.authentication.jwtToken);
 
     const handleSubmit = async () => {
         setOpen(false);
@@ -104,28 +100,6 @@ export default function AdvanceSearchDialog({ fetchData, setFetchData, open, set
     React.useEffect(() => {
         console.log(addList)
     }, [addList])
-    // Filter options based on search term
-    // const filterResult = (search, show) => {
-    //     const filtered = searchList.filter(option =>
-    //         option.toLowerCase().includes(search.toLowerCase())
-    //     );
-    //     if (show) {
-    //         setShowOptions(search !== '');
-    //     }
-    //     setFilteredOptions(filtered);
-    // }
-
-    // const handleSearchInputChange = (e) => {
-    //     const inputValue = e.target.value;
-    //     setSearchTerm(inputValue); // Show options only if input value is not empty
-    //     filterResult(inputValue, true)
-    // };
-
-    // const handleOptionClick = (option) => {
-    //     setSearchTerm(option);
-    //     setShowOptions(false);
-    //     setFilteredOptions([]);
-    // }
 
     return (
         <React.Fragment>
@@ -261,40 +235,3 @@ export default function AdvanceSearchDialog({ fetchData, setFetchData, open, set
         </React.Fragment>
     );
 }
-
-// <div>
-// <div className="flex">
-//     <input
-//         type="text"
-//         placeholder="Type to Search"
-//         value={searchTerm}
-//         className="w-[230px] outline-none text-black text-sm px-2 py-2"
-//         style={{ border: "1px solid #ccc", borderRight: "none" }}
-//         onChange={handleSearchInputChange}
-//     />
-//     <ArrowDropDownIcon
-//         onClick={() => {
-//             setShowOptions(!showOptions);
-//             filterResult(searchTerm, false);
-//         }}
-//         style={{ border: "1px solid #ccc", borderLeft: "none", height: "40" }}
-//         className="bg-white w-[20px] h-[auto] text-gray-700 cursor-pointer"
-//     />
-// </div>
-// {showOptions && (
-//     <ul
-//         className="options-list absolute bg-white w-[254px] max-h-[200px] overflow-auto px-2"
-//         style={{ border: "1px solid #ccc", zIndex: 1000, boxShadow: "2px 2px 6px #ccc -2px -2px 10px #ccc" }}
-//     >
-//         {filteredOptions.map((option) => (
-//             <li
-//                 key={option}
-//                 className="cursor-default hover:opacity-60"
-//                 onClick={() => handleOptionClick(option)}
-//             >
-//                 {option}
-//             </li>
-//         ))}
-//     </ul>
-// )}
-// </div>
