@@ -97,9 +97,9 @@ export default function AdvanceSearchDialog({ fetchData, setFetchData, open, set
     const [tempSelected, setTempSelected] = React.useState({ 'type': 'Lead Activity', 'value': '', 'isPresent': 'Is' });
     const [selectedColumn, setSelectedColumn] = React.useState(leadActivity);
 
-    React.useEffect(() => {
-        console.log(addList)
-    }, [addList])
+    // React.useEffect(() => {
+    //     console.log(addList)
+    // }, [addList])
 
     return (
         <React.Fragment>

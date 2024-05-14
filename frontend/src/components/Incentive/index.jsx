@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import IncentiveFilterationDialog from './Dialog';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import ProductivityTable from '../ProductivityTable';
+import IncentiveTable from '../IncentiveTable';
 
 const Index = () => {
     const [open, setOpen] = useState(false);
@@ -16,6 +16,14 @@ const Index = () => {
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
     const [searchList, setSearchList] = useState([]);
     const [show, setShow] = useState(false);
+    const [filteration, setFilteration] = useState({
+        name: "",
+        segment: '',
+        closureDate: null,
+        channel: '',
+        saleType: '',
+    })
+    const [fetchData, setFetchData] = useState(false);
     useEffect(()=>{
         const fetchData = async () => {
             try {
@@ -95,8 +103,8 @@ const Index = () => {
                         <p className="text-sm mb-1">Segment</p>
                         <div className='flex items-center'>
                             <LocationOnIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
-                            <select type='text' placeholder='Select Segment' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
-                                <option selected disabled>Select Segment</option>
+                            <select onChange={(e)=>{setFilteration({...filteration, segment: e.target.value})}} type='text' placeholder='Select Segment' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
+                                <option value='' selected disabled>Select Segment</option>
                                 <option value="Primary">Primary</option>
                                 <option value="Secondary">Secondary</option>
                             </select>
@@ -105,15 +113,15 @@ const Index = () => {
                     <div className='flex-1'>
                         <p className="text-sm mb-1">Deal Closure Date</p>
                         <div className='flex items-center'>
-                            <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
+                            <input onChange={(e)=>{setFilteration({...filteration, closureDate: e.target.value})}} type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
                         </div>
                     </div>
                     <div className='flex-1'>
                         <p className="text-sm mb-1">Channel</p>
                         <div className='flex items-center'>
                             <LocationOnIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
-                            <select type='text' placeholder='Select Channel' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
-                                <option selected disabled>Select Channel</option>
+                            <select onChange={(e)=>{setFilteration({...filteration, channel: e.target.value})}} type='text' placeholder='Select Channel' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
+                                <option value="" selected disabled>Select Channel</option>
                                 <option value="Direct">Direct</option>
                                 <option value="Other Brokerage">Other Brokerage</option>
                                 <option value="Referral">Referral</option>
@@ -124,8 +132,8 @@ const Index = () => {
                         <p className="text-sm mb-1">Sale Type</p>
                         <div className='flex items-center'>
                             <LocationOnIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
-                            <select type='text' placeholder='Select Sale Type' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
-                                <option selected disabled>Select Sale Type</option>
+                            <select onChange={(e)=>{setFilteration({...filteration, saleType: e.target.value})}} type='text' placeholder='Select Sale Type' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
+                                <option value="" selected disabled>Select Sale Type</option>
                                 <option value="Self">Self</option>
                                 <option value="Assisted By Leader">Assisted By Leader</option>
                             </select>
@@ -135,11 +143,17 @@ const Index = () => {
                     </div>
                 </div>
                 <div className='flex items-end h-full py-3 px-2'>
-                    <button className="bg-blue-600 rounded-md text-white py-[0] px-3 h-[30px]">Filter</button>
+                    <button onClick={()=>{
+                        if(show){
+                            setFetchData(!fetchData)
+                        }else{
+                            setShow(!show); 
+                        }
+                    }} className="bg-blue-600 rounded-md text-white py-[0] px-3 h-[30px]">Filter</button>
                 </div>
             </div>
             <IncentiveFilterationDialog open={open} setOpen={setOpen} show={show} setShow={setShow} />
-            { show && <ProductivityTable/> }
+            { show && <IncentiveTable filteration={filteration} fetchData={fetchData} setFetchData={setFetchData}/> }
         </div>
     )
 }
