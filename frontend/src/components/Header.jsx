@@ -14,10 +14,11 @@ const Header = () => {
             <div className="px-4 py-2 w-full flex justify-between items-center relative">
                 <img className="h-[40px] mr-4" src='/assets/logo.png' alt="Logo" />
                 <div className="relative flex w-full justify-end">
-                    <Link to="/performance" className='text-white mr-3'>Performance Dashboard</Link>
-                    <Link to="/incentive" className='text-white mr-3'>Incentive Dashboard</Link>
-                    <Link to="/productivty" className='text-white mr-3'>Productivity Dashboard</Link>
-                    <Link to="/LeadManagement" className='text-white mr-3'>Leads Dashboard</Link>
+                    <Link to="/create/deal" className='text-white text-sm  mr-3'>Create Deal</Link>
+                    <Link to="/performance" className='text-sm text-white mr-3'>Performance Dashboard</Link>
+                    <Link to="/incentive" className='text-white text-sm  mr-3'>Incentive Dashboard</Link>
+                    <Link to="/productivty" className='text-white text-sm  mr-3'>Productivity Dashboard</Link>
+                    <Link to="/LeadManagement" className='text-white text-sm  mr-3'>Leads Dashboard</Link>
                     <div style={{borderRight: "1px solid #ccc"}} className='mx-4'></div>
                     <div className="group">
                         <PersonOutlineOutlinedIcon className="h-8 w-8 rounded-full cursor-pointer text-white" style={{ borderRadius: "50%", border: "1px solid #ccc", padding: "1px" }} />

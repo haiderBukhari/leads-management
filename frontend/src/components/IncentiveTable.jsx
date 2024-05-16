@@ -22,9 +22,10 @@ import RoleSelectionDialog from '../components/UserType';
 import { failedToast, successToast } from '../utils/ToastsNotifications';
 import AssignOwnerDialog from '../components/AssignOwner';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
-function createData(id, name, creationDate, creatorName, bspTotal) {
-    return { id, name, creationDate, creatorName, bspTotal };
+function createData(id, name, creationDate, creatorName, bspTotal, status) {
+    return { id, name, creationDate, creatorName, bspTotal, status };
 }
 
 const headCells = [
@@ -135,7 +136,8 @@ export default function IncentiveTable({filteration, fetchData, setFetchData}) {
                         item.name,
                         item.createdAt,
                         item.ownerName || '-',
-                        item.propertyDetails.bspTotal || '-'
+                        item.propertyDetails.bspTotal || '-',
+                        item.dealStatus || '-',
                     )
                 );
                 setRows(formattedRows);
@@ -306,7 +308,9 @@ export default function IncentiveTable({filteration, fetchData, setFetchData}) {
                                                                 scope="row"
                                                                 padding="none"
                                                             >
+                                                                <Link to={`/deal/${row.id}`} className="text-red-700">
                                                                 {row.id}
+                                                                </Link>
                                                             </TableCell>
                                                         );
                                                     case 'name':
@@ -318,7 +322,7 @@ export default function IncentiveTable({filteration, fetchData, setFetchData}) {
                                                     case 'bspTotal':
                                                         return <TableCell key={column.id}>{row.bspTotal}</TableCell>;
                                                             case 'action':
-                                                        return <TableCell key={column.id}>Pending</TableCell>;
+                                                        return <TableCell key={column.id}>{row.status}</TableCell>;
                                                     default:
                                                         return null;
                                                 }

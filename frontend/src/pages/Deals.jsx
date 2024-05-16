@@ -2,8 +2,8 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import { successToast } from "../utils/ToastsNotifications"
-
-const CreateDeal = () => {
+import { useParams, useNavigate } from "react-router-dom";
+export const CreateDeal = () => {
     const [openProperty, setOpenProperty] = useState(false)
     const [clientDetails, setCLientDetails] = useState(false)
     const [paymentDetails, setPayemntDetails] = useState(false)
@@ -13,8 +13,13 @@ const CreateDeal = () => {
     const [filteredOptions, setFilteredOptions] = useState([]);
     const [showOptions, setShowOptions] = useState(false);
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
+    const userData = useSelector((state) => state.authentication);
     const [searchList, setSearchList] = useState([]);
+    const Navigate = useNavigate('');
     const [selectedLead, setSelectedLead] = useState({});
+    const { id } = useParams();
+    const userId = useSelector(state => state.authentication.userId);
+    const [fetchAgain, setFetchAgain] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         leadId: null,
@@ -65,9 +70,9 @@ const CreateDeal = () => {
         paymentDetails: {
             bookingAmount: 0,
             amountMode: '',
-            commissionSlabNotes: '',
-            baseCommissionAmount: 0,
-            loyaltyDiscount: 0,
+            commissonSlabNotes: '',
+            baseCommisonAmount: 0,
+            loyalityDiscount: 0,
             netRevenue: 0,
             specialRemarks: ''
         },
@@ -78,8 +83,27 @@ const CreateDeal = () => {
         }
     });
 
+    useEffect(() => {
+        async function FetchData() {
+            if (id) {
+                await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/deal/${id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwtToken}`
+                    },
+                })
+                    .then((res) => {
+                        setFormData(res.data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            }
+        }
+        FetchData();
+    }, [id, fetchAgain])
     const createDeals = async () => {
-        const formDatas = { ...formData, propertyDetails: { ...formData.propertyDetails, bspTotal: formData.propertyDetails.bspPSF * formData.propertyDetails.size }, paymentDetails: {...formData.paymentDetails, netRevenue: formData.paymentDetails.baseCommissionAmount - formData.paymentDetails.loyaltyDiscount} };
+        const formDatas = { ...formData, propertyDetails: { ...formData.propertyDetails, bspTotal: formData.propertyDetails.bspPSF * formData.propertyDetails.size }, paymentDetails: { ...formData.paymentDetails, netRevenue: formData.paymentDetails.baseCommisonAmount - formData.paymentDetails.loyalityDiscount } };
         console.log(formData);
 
         await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/deal`, formDatas, {
@@ -88,12 +112,12 @@ const CreateDeal = () => {
                 'Authorization': `Bearer ${jwtToken}`
             },
         })
-        .then(() => {
-            successToast('Deal Created!')
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-        });
+            .then(() => {
+                successToast('Deal Created!')
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
     }
     useEffect(() => {
         const fetchData = async () => {
@@ -170,6 +194,59 @@ const CreateDeal = () => {
         })
     };
 
+    function validateRendering() {
+        if (userData.isAdmin) {
+            if (formData.isAdminApproved) {
+                return false;
+            }
+            if (formData.managerId) {
+                if (formData.isManagerApproved) {
+                    if (formData.generalManagerId) {
+                        if (formData.isGeneralManagerApproved) {
+                            return true;
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
+            } else if (formData.generalManagerId) {
+                if (formData.isGeneralManagerApproved) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        }
+        else if (userData.isGeneralManager && formData.generalManagerId && !formData.isGeneralManagerApproved && formData.generalManagerId === userId) {
+            if (formData.managerId) {
+                if (formData.isManagerApproved) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        }
+        else if (userData.isManager && formData.managerId && !formData.isManagerApproved && formData.managerId === userId) {
+            return true;
+        }
+    }
+
+    const finalDeal = async () => {
+        await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/deal/${id}?userId=${userId}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`
+            },
+        }).then(() => {
+                Navigate('/incentive')
+                successToast('Deal approved!')
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+
     return (
         <div className="pt-16">
             <h1 className="text-2xl font-semibold pl-8 pb-6">Deal Closure Form</h1>
@@ -180,7 +257,7 @@ const CreateDeal = () => {
                         <div className="mt-5 flex flex-wrap">
                             <div className="flex flex-col mr-7 relative">
                                 <label className="text-sm font-medium mb-1">Lead Name*</label>
-                                <input type='text' placeholder="Lead Name" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={searchTerm} onChange={handleSearchInputChange} />
+                                <input type='text' placeholder="Lead Name" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.name} onChange={handleSearchInputChange} disabled={id ? true : false} />
                                 {showOptions && (
                                     <ul className="options-list absolute bg-white w-[250px] max-h-[200px] overflow-auto px-2" style={{ border: "1px solid #ccc", zIndex: 1000, boxShadow: "2px 2px 6px #ccc -2px -2px 10px #ccc", top: "63px" }}
                                     >
@@ -198,15 +275,15 @@ const CreateDeal = () => {
                             </div>
                             <div className="flex flex-col mr-7">
                                 <label className="text-sm font-medium mb-1">Lead ID*</label>
-                                <input type='text' placeholder="Lead ID" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={selectedLead._id} />
+                                <input type='text' placeholder="Lead ID" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={formData.leadId} />
                             </div>
                             <div className="flex flex-col mr-7">
                                 <label className="text-sm font-medium mb-1">Customer Contact Number</label>
-                                <input type='text' placeholder="Contact Number" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={selectedLead.phone} />
+                                <input type='text' placeholder="Contact Number" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={formData.contactNumber} />
                             </div>
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium mb-1">Customer Email</label>
-                                <input type='text' placeholder="Email" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={selectedLead.email} />
+                                <input type='text' placeholder="Email" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={formData.email} />
                             </div>
                         </div>
                     </div>
@@ -222,32 +299,32 @@ const CreateDeal = () => {
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Segment</label>
                                             <select onChange={(e) => { setFormData({ ...formData, segment: e.target.value }) }} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                                <option value='' key='' disabled selected>Segment</option>
-                                                <option value='Primary'>Primary</option>
-                                                <option value='Secondary'>Secondary</option>
+                                                <option selected={formData.segment === ''} value='' key='' disabled>Segment</option>
+                                                <option selected={formData.segment === 'Primary'} value='Primary'>Primary</option>
+                                                <option selected={formData.segment === 'Secondary'} value='Secondary'>Secondary</option>
                                             </select>
                                         </div>
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Deal Closure Date</label>
-                                            <input onChange={handleInputChange} name="dealClosureDate" type='date' placeholder="Booking " className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={handleInputChange} name="dealClosureDate" type='date' placeholder="Booking " className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.dealClosureDate?.slice(0, 10)} />
                                         </div>
                                     </div>
                                     <div className="flex flex-row mt-4">
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Channel</label>
                                             <select onChange={(e) => { setFormData({ ...formData, channel: e.target.value }) }} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                                <option value='' key='' disabled selected>Channel</option>
-                                                <option value='Direct'>Direct</option>
-                                                <option value='Other Brokerage'>Other Brokerage</option>
-                                                <option value='Referral'>Referral</option>
+                                                <option selected={formData.channel === ''} value='' key='' disabled>Channel</option>
+                                                <option selected={formData.channel === 'Direct'} value='Direct'>Direct</option>
+                                                <option selected={formData.channel === 'Other'} value='Other Brokerage'>Other Brokerage</option>
+                                                <option selected={formData.channel === 'Referral'} value='Referral'>Referral</option>
                                             </select>
                                         </div>
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Sale Type</label>
                                             <select onChange={(e) => { setFormData({ ...formData, saleType: e.target.value }) }} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                                <option value='' key='' disabled selected>Sale Type</option>
-                                                <option value='Self'>Self</option>
-                                                <option value='Assisted By Leader'>Assisted By Leader</option>
+                                                <option selected={formData.saleType === ''} value='' key='' disabled>Sale Type</option>
+                                                <option selected={formData.saleType === 'Self'} value='Self'>Self</option>
+                                                <option selected={formData.saleType === 'Assisted By Leader'} value='Assisted By Leader'>Assisted By Leader</option>
                                             </select>                                    </div>
                                     </div>
                                 </div>
@@ -264,22 +341,22 @@ const CreateDeal = () => {
                                     <div className="flex flex-col flex-1 mr-7">
                                         <label className="text-sm font-medium mb-1">Property</label>
                                         <select onChange={(event) => handleNestedInputChange('propertyDetails', 'property', event.target.value)} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                            <option value='' key='' disabled selected>Property</option>
-                                            <option value='Residential'>Residential</option>
-                                            <option value='Commercial'>Commercial</option>
-                                            <option value='Land'>Land</option>
+                                            <option selected={formData.propertyDetails.property === ''} value='' key='' disabled>Property</option>
+                                            <option selected={formData.propertyDetails.property === 'Residential'} value='Residential'>Residential</option>
+                                            <option selected={formData.propertyDetails.property === 'Commercial'} value='Commercial'>Commercial</option>
+                                            <option selected={formData.propertyDetails.property === 'Land'} value='Land'>Land</option>
                                         </select>
                                     </div>
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Property Type</label>
                                         <select onChange={(event) => handleNestedInputChange('propertyDetails', 'propertyType', event.target.value)} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                            <option value='' key='' disabled selected>Property Type</option>
-                                            <option value='Residential'>Apartment</option>
-                                            <option value='Commercial'>Townhouse</option>
-                                            <option value='Land'>Villa</option>
-                                            <option value='Land'>Shop</option>
-                                            <option value='Land'>Office</option>
-                                            <option value='Land'>Others</option>
+                                            <option selected={formData.propertyDetails.propertyType === ''} value='' key='' disabled>Property Type</option>
+                                            <option selected={formData.propertyDetails.propertyType === 'Apartment'} value='Apartment'>Apartment</option>
+                                            <option selected={formData.propertyDetails.propertyType === 'Townhouse'} value='Townhouse'>Townhouse</option>
+                                            <option selected={formData.propertyDetails.propertyType === 'Villa'} value='Villa'>Villa</option>
+                                            <option selected={formData.propertyDetails.propertyType === 'Shop'} value='Shop'>Shop</option>
+                                            <option selected={formData.propertyDetails.property === 'Office'} value='Office'>Office</option>
+                                            <option selected={formData.propertyDetails.property === 'Others'} value='Others'>Others</option>
                                         </select>
                                     </div>
                                     {/* <textarea cols="30" rows="10"></textarea> */}
@@ -287,43 +364,43 @@ const CreateDeal = () => {
                                 <div className="flex flex-row mt-4 px-5">
                                     <div className="flex flex-col flex-1  mr-7">
                                         <label className="text-sm font-medium mb-1">Property Description</label>
-                                        <textarea onChange={(event) => handleNestedInputChange('propertyDetails', 'propertyDescription', event.target.value)} cols='30' rows='10' placeholder="Property Description" className="w-[full] outline-none text-black text-sm h-[auto] placeholder:text-black py-2 px-3" style={{ border: "1px solid #D2D6DE" }} > </textarea>
+                                        <textarea onChange={(event) => handleNestedInputChange('propertyDetails', 'propertyDescription', event.target.value)} cols='30' rows='10' placeholder="Property Description" className="w-[full] outline-none text-black text-sm h-[auto] placeholder:text-black py-2 px-3" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.propertyDescription} > </textarea>
                                     </div>
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Developer</label>
-                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'developer', event.target.value)} type='text' placeholder="Developer" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'developer', event.target.value)} type='text' placeholder="Developer" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" value={formData.propertyDetails.developer} style={{ border: "1px solid #D2D6DE" }} />
                                     </div>
                                 </div>
                                 <div className="flex flex-row mt-4 px-5">
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Project Name</label>
-                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'projectName', event.target.value)} type='text' placeholder="Project Name" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'projectName', event.target.value)} type='text' placeholder="Project Name" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.projectName} />
                                     </div>
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Size</label>
-                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'size', event.target.value)} type='text' placeholder="Size (sq feet)" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'size', event.target.value)} type='text' placeholder="Size (sq feet)" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.size} />
                                     </div>
                                 </div>
                                 <div className="flex flex-row mt-4 px-5">
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Tower No</label>
-                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'towerNo', event.target.value)} type='text' placeholder="Tower No" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'towerNo', event.target.value)} type='text' placeholder="Tower No" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.towerNo} />
                                     </div>
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Floor No</label>
-                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'floorNo', event.target.value)} type='text' placeholder="Floor No" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'floorNo', event.target.value)} type='text' placeholder="Floor No" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.floorNo} />
                                     </div>
                                 </div>
                                 <div className="flex flex-row mt-4 px-5">
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Unit Number</label>
-                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'unitNo', event.target.value)} type='text' placeholder="Unit Number" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                        <input onChange={(event) => handleNestedInputChange('propertyDetails', 'unitNo', event.target.value)} type='text' placeholder="Unit Number" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.unitNo} />
                                     </div>
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">BSP(PSF)</label>
                                         <div className="flex w-full">
                                             <div className="h-[40px] w-[50px] bg-[#00A65A] text-white flex justify-center items-center">AED</div>
-                                            <input onChange={(event) => handleNestedInputChange('propertyDetails', 'bspPSF', event.target.value)} type='number' placeholder="BSP(PSF)" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={(event) => handleNestedInputChange('propertyDetails', 'bspPSF', event.target.value)} type='number' placeholder="BSP(PSF)" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.bspPSF} />
                                         </div>
                                     </div>
                                 </div>
@@ -338,7 +415,7 @@ const CreateDeal = () => {
                                         </div>
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Payment Plan</label>
-                                            <input onChange={(event) => handleNestedInputChange('propertyDetails', 'paymentPlan', event.target.value)} type='text' placeholder="Payment Plan" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={(event) => handleNestedInputChange('propertyDetails', 'paymentPlan', event.target.value)} type='text' placeholder="Payment Plan" className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.paymentPlan} />
                                         </div>
                                     </div>
                                 </div>
@@ -348,15 +425,15 @@ const CreateDeal = () => {
                                             <label className="text-sm font-medium mb-1">DLD Amount</label>
                                             <div className="flex w-full">
                                                 <div className="h-[40px] w-[50px] bg-[#00A65A] text-white flex justify-center items-center">AED</div>
-                                                <input onChange={(event) => handleNestedInputChange('propertyDetails', 'DLDAmount', event.target.value)} type='number' placeholder="DLD Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                                <input onChange={(event) => handleNestedInputChange('propertyDetails', 'DLDAmount', event.target.value)} type='number' placeholder="DLD Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.DLDAmount} />
                                             </div>
                                         </div>
                                         <div className="flex flex-col flex-1 mr-7">
                                             <label className="text-sm font-medium mb-1">DLD Status</label>
                                             <select onChange={(event) => handleNestedInputChange('propertyDetails', 'DLDStatus', event.target.value)} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                                <option value='' key='' disabled selected>DLD Status</option>
-                                                <option value='Paid'>Paid</option>
-                                                <option value='Not Paid'>Not Paid</option>
+                                                <option selected={formData.propertyDetails.DLDStatus === ''} value='' key='' disabled>DLD Status</option>
+                                                <option selected={formData.propertyDetails.DLDStatus === 'Paid'} value='Paid'>Paid</option>
+                                                <option selected={formData.propertyDetails.DLDStatus === 'Not Paid'} value='Not Paid'>Not Paid</option>
                                             </select>
                                         </div>
                                     </div>
@@ -365,24 +442,24 @@ const CreateDeal = () => {
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">No of Parkings</label>
                                         <div className="flex w-full">
-                                            <input onChange={(event) => handleNestedInputChange('propertyDetails', 'noOfParking', event.target.value)} type='text' placeholder="No of Parkings" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={(event) => handleNestedInputChange('propertyDetails', 'noOfParking', event.target.value)} type='text' placeholder="No of Parkings" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.propertyDetails.noOfParking} />
                                         </div>
                                     </div>
                                     <div className="flex flex-col flex-1 mr-7">
                                         <label className="text-sm font-medium mb-1">SPA Stage</label>
                                         <select onChange={(event) => handleNestedInputChange('propertyDetails', 'SPAStage', event.target.value)} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                            <option value='' key='' disabled selected>SPA Stage</option>
-                                            <option value='Paid'>Signed</option>
-                                            <option value='Not Paid'>Not Signed</option>
+                                            <option selected={formData.propertyDetails.SPAStage === ''} value='' key='' disabled>SPA Stage</option>
+                                            <option selected={formData.propertyDetails.SPAStage === 'Signed'} value='Signed'>Signed</option>
+                                            <option selected={formData.propertyDetails.SPAStage === 'Not Signed'} value='Not Signed'>Not Signed</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div className="flex flex-col flex-1 mr-7 mt-4 px-5">
                                     <label onChange={(event) => handleNestedInputChange('propertyDetails', 'purposeOfPurchase', event.target.value)} className="text-sm font-medium mb-1">Purpose of Purchase</label>
                                     <select style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                        <option value='' key='' disabled selected>Purpose of Purchase</option>
-                                        <option value='Paid'>End Use</option>
-                                        <option value='Not Paid'>Investment</option>
+                                        <option selected={formData.propertyDetails.purposeOfPurchase === ''} value='' key='' disabled>Purpose of Purchase</option>
+                                        <option selected={formData.propertyDetails.purposeOfPurchase === 'End Use'} value='End Use'>End Use</option>
+                                        <option selected={formData.propertyDetails.purposeOfPurchase === 'Investment'} value='Investment'>Investment</option>
                                     </select>
                                 </div>
                             </div>
@@ -398,11 +475,11 @@ const CreateDeal = () => {
                                     <div className="mt-5 flex flex-wrap">
                                         <div className="flex flex-col mr-7">
                                             <label className="text-sm font-medium mb-1">CRM Lead ID</label>
-                                            <input type='text' placeholder="CRM Lead ID" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={selectedLead._id} />
+                                            <input type='text' placeholder="CRM Lead ID" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.leadId} disabled={id ? true : false} />
                                         </div>
                                         <div className="flex flex-col mr-7">
                                             <label className="text-sm font-medium mb-1">Client Mobile Number*</label>
-                                            <input type='text' placeholder="Client Mobile Number" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={selectedLead.phone} />
+                                            <input type='text' placeholder="Client Mobile Number" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={formData.contactNumber} />
                                         </div>
                                         <div className="flex flex-col mr-7">
                                             <label className="text-sm font-medium mb-1">Primary Applicant</label>
@@ -410,7 +487,7 @@ const CreateDeal = () => {
                                         </div>
                                         <div className="flex flex-col">
                                             <label className="text-sm font-medium mb-1">Client Email</label>
-                                            <input type='text' placeholder="Email" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={selectedLead.email} />
+                                            <input type='text' placeholder="Email" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={formData.email} />
                                         </div>
                                     </div>
                                     <div className="mt-4 py-4 px-4" style={{ border: "1px solid #3C8DBC" }}>
@@ -484,13 +561,13 @@ const CreateDeal = () => {
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Emirates ID No</label>
                                         <div className="flex w-full">
-                                            <input onChange={handleInputChange} name="emirates" type='text' placeholder="ID No" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={handleInputChange} name="emirates" type='text' placeholder="ID No" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.emirates} />
                                         </div>
                                     </div>
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Passport No</label>
                                         <div className="flex w-full">
-                                            <input onChange={handleInputChange} name="passportNo" type='text' placeholder="Passport No" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={handleInputChange} name="passportNo" type='text' placeholder="Passport No" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.passportNo} />
                                         </div>
                                     </div>
                                 </div>
@@ -498,25 +575,25 @@ const CreateDeal = () => {
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Date of Birth</label>
                                         <div className="flex w-full">
-                                            <input onChange={handleInputChange} name="dateOfBirth" type='date' placeholder="Date of Birth" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={handleInputChange} name="dateOfBirth" type='date' placeholder="Date of Birth" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.dateOfBirth} />
                                         </div>
                                     </div>
                                     <div className="flex flex-col mr-7 flex-1">
                                         <label className="text-sm font-medium mb-1">Mortgage Required</label>
                                         <select onChange={handleInputChange} name="mortage" style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                            <option value='' key='' disabled selected>Mortgage Required</option>
-                                            <option value='Yes'>Yes</option>
-                                            <option value='No'>No</option>
+                                            <option selected={formData.mortgage === ''} value='' key='' disabled>Mortgage Required</option>
+                                            <option selected={formData.mortgage === 'Yes'} value='Yes'>Yes</option>
+                                            <option selected={formData.mortgage === 'No'} value='No'>No</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div className="flex flex-col mr-7 flex-1 px-5 mt-3">
                                     <label className="text-sm font-medium mb-1">Lead Source</label>
                                     <select onChange={handleInputChange} name="leadSource" style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                        <option value='' key='' disabled selected>Lead Source</option>
-                                        <option value='Self'>Self</option>
-                                        <option value='CRM'>CRM</option>
-                                        <option value='Channel Partner'>Channel Partner</option>
+                                        <option selected={formData.leadSource === ''} value='' key='' disabled>Lead Source</option>
+                                        <option selected={formData.leadSource === 'Self'} value='Self'>Self</option>
+                                        <option selected={formData.leadSource === 'CRM'} value='CRM'>CRM</option>
+                                        <option selected={formData.leadSource === 'Channel Partner'} value='Channel Partner'>Channel Partner</option>
                                     </select>
                                 </div>
                             </div>
@@ -535,29 +612,29 @@ const CreateDeal = () => {
                                             <label className="text-sm font-medium mb-1">Booking Amount</label>
                                             <div className="flex w-full">
                                                 <div className="h-[40px] w-[50px] bg-[#00A65A] text-white flex justify-center items-center">AED</div>
-                                                <input onChange={(event) => handleNestedInputChange('paymentDetails', 'bookingAmount', event.target.value)} type='number' placeholder="Booking Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                                <input onChange={(event) => handleNestedInputChange('paymentDetails', 'bookingAmount', event.target.value)} type='number' placeholder="Booking Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.paymentDetails.bookingAmount} />
                                             </div>                                    </div>
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Booking Amount Mode</label>
                                             <select onChange={(event) => handleNestedInputChange('paymentDetails', 'amountMode', event.target.value)} style={{ border: "1px solid #D2D6DE" }} className="w-[full] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
-                                                <option value='' key='' disabled selected>Booking Amount Mode</option>
-                                                <option value='Residential'>Cheque</option>
-                                                <option value='Commercial'>Bank Transfer</option>
-                                                <option value='Land'>Card</option>
-                                                <option value='Land'>Cash</option>
+                                                <option selected={formData.paymentDetails.amountMode} value='' key='' disabled>Booking Amount Mode</option>
+                                                <option selected={formData.paymentDetails.amountMode} value='Cheque'>Cheque</option>
+                                                <option selected={formData.paymentDetails.amountMode} value='Bank Transfer'>Bank Transfer</option>
+                                                <option selected={formData.paymentDetails.amountMode} value='Card'>Card</option>
+                                                <option selected={formData.paymentDetails.amountMode} value='Cash'>Cash</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div className="flex flex-row mt-4">
                                         <div className="flex flex-col flex-1  mr-7">
                                             <label className="text-sm font-medium mb-1">Commission Slab Notes</label>
-                                            <textarea onChange={(event) => handleNestedInputChange('paymentDetails', 'commissonSlabNotes', event.target.value)} cols='30' rows='10' placeholder="Commission Slab Notes" className="w-[full] outline-none text-black text-sm h-[auto] placeholder:text-black py-2 px-3" style={{ border: "1px solid #D2D6DE" }} > </textarea>
+                                            <textarea onChange={(event) => handleNestedInputChange('paymentDetails', 'commissonSlabNotes', event.target.value)} cols='30' rows='10' placeholder="Commission Slab Notes" className="w-[full] outline-none text-black text-sm h-[auto] placeholder:text-black py-2 px-3" style={{ border: "1px solid #D2D6DE" }} value={formData.paymentDetails.commissonSlabNotes}> </textarea>
                                         </div>
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Base Commission Amount</label>
                                             <div className="flex w-full">
                                                 <div className="h-[40px] w-[50px] bg-[#00A65A] text-white flex justify-center items-center">AED</div>
-                                                <input onChange={(event) => handleNestedInputChange('paymentDetails', 'baseCommissionAmount', event.target.value)} value={formData.paymentDetails.baseCommissionAmount} type='number' placeholder="Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                                <input onChange={(event) => handleNestedInputChange('paymentDetails', 'baseCommisonAmount', event.target.value)} value={formData.paymentDetails.baseCommisonAmount} type='number' placeholder="Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
                                             </div>                                      </div>
                                     </div>
                                     <div className="flex flex-row mt-4">
@@ -565,19 +642,19 @@ const CreateDeal = () => {
                                             <label className="text-sm font-medium mb-1">Client Loyalty Discount</label>
                                             <div className="flex w-full">
                                                 <div className="h-[40px] w-[50px] bg-[#00A65A] text-white flex justify-center items-center">AED</div>
-                                                <input onChange={(event) => handleNestedInputChange('paymentDetails', 'loyaltyDiscount', event.target.value)} value={formData.paymentDetails.loyaltyDiscount} type='number' placeholder="Discount Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                                <input onChange={(event) => handleNestedInputChange('paymentDetails', 'loyalityDiscount', event.target.value)} value={formData.paymentDetails.loyalityDiscount} type='number' placeholder="Discount Amount" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
                                             </div>                                                                          </div>
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Net Revenue</label>
                                             <div className="flex w-full">
                                                 <div className="h-[40px] w-[50px] bg-[#00A65A] text-white flex justify-center items-center">AED</div>
-                                                <input type='number' placeholder="Net Revenue" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={formData.paymentDetails.baseCommissionAmount - formData.paymentDetails.loyaltyDiscount} />
+                                                <input type='number' placeholder="Net Revenue" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} disabled value={formData.paymentDetails.baseCommisonAmount - formData.paymentDetails.loyalityDiscount} />
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex flex-col flex-1  mr-7 mt-5">
                                         <label className="text-sm font-medium mb-1">Special Remarks</label>
-                                        <input onChange={(event) => handleNestedInputChange('paymentDetails', 'specialRemarks', event.target.value)} type='text' placeholder="Remarks" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                        <input onChange={(event) => handleNestedInputChange('paymentDetails', 'specialRemarks', event.target.value)} type='text' placeholder="Remarks" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.paymentDetails.specialRemarks} />
                                     </div>
                                 </div>
                             </div>
@@ -594,24 +671,26 @@ const CreateDeal = () => {
                                     <div className="flex flex-row mt-4">
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Name of Employee</label>
-                                            <input onChange={(event) => handleNestedInputChange('dealAttribution', 'employeeName', event.target.value)} type='text' placeholder="Employee" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={(event) => handleNestedInputChange('dealAttribution', 'employeeName', event.target.value)} type='text' placeholder="Employee" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.dealAttribution.employeeName} />
                                         </div>
                                         <div className="flex flex-col mr-7 flex-1">
                                             <label className="text-sm font-medium mb-1">Share %</label>
-                                            <input onChange={(event) => handleNestedInputChange('dealAttribution', 'sharePercentage', event.target.value)} type='text' placeholder="Share" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} />
+                                            <input onChange={(event) => handleNestedInputChange('dealAttribution', 'sharePercentage', event.target.value)} type='text' placeholder="Share" className="w-full outline-none text-black text-sm px-2 h-[40px] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.dealAttribution.sharePercentage} />
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         }
                     </div>
-                    <div className="flex justify-end px-5">
-                        <button onClick={createDeals} className="bg-[#F39C12] py-2 px-7 rounded-sm mt-5 text-white"> Create Deal</button>
-                    </div>
+                    {
+                        id ? formData.ownerId !== userId && validateRendering() && <div className="flex justify-end px-5">
+                            <button onClick={finalDeal} className="bg-green-600 py-2 px-7 rounded-sm mt-5 text-white"> Final Deal</button>
+                        </div> : <div className="flex justify-end px-5">
+                            <button onClick={createDeals} className="bg-[#F39C12] py-2 px-7 rounded-sm mt-5 text-white"> Create Deal</button>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
     )
 }
-
-export default CreateDeal

@@ -8,7 +8,7 @@ import ManageUser from '../pages/ManageUser';
 import ProductivityDashboard from '../pages/ProductivityDashboard';
 import IncentiveDashboard from '../pages/IncentiveDashboard';
 import PerformanceDashboard from '../pages/PerformanceDashboard';
-import CreateDeal from '../pages/Deals';
+import {CreateDeal} from '../pages/Deals';
 //import { useSelector } from 'react-redux';
 
 const Index = () => {
@@ -29,6 +29,7 @@ const Index = () => {
                 <Route path="/incentive" element={<IncentiveDashboard/>} />
                 <Route path="/performance" element={<PerformanceDashboard/>} />
                 <Route path="/create/deal" element={<CreateDeal/>} />
+                <Route path="/deal/:id" element={<CreateDeal/>} />
                 {/* <Route path="/login" element={data.jwtToken ? <Login /> : <Navigate to="/LeadManagement"/>} /> */}
                 {/* <Route path="/register" element={data.jwtToken ? <Register /> : <Navigate to="/LeadManagement"/>} /> */}
                 {/* <Route path="/LeadManagement" element={data.jwtToken ? <Leads /> : <Navigate to="/login"/>} /> */}
