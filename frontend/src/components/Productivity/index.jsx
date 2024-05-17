@@ -15,8 +15,8 @@ const Index = () => {
     const [showOptions, setShowOptions] = useState(false);
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
     const [searchList, setSearchList] = useState([]);
-    const [show, setShow] = useState(false);
-    useEffect(()=>{
+    const [show, setShow] = useState(true);
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/register/employee/name?name=${searchTerm || ""}`, {
@@ -69,13 +69,13 @@ const Index = () => {
                     <button onClick={() => { setOpen(!open); }} className="bg-yellow-600 rounded-md text-white py-[0] px-3 h-[30px]"><AddIcon className="px-1" /> Columns</button>
                 </div>
             </div>
-            <div className='flex justify-between items-end'>
-                <div className="w-full flex items-center bg-white py-3 px-2">
+            <div className='flex flex-col md:flex-row justify-start md:justify-between items-end'>
+                <div className="w-full flex md:items-center flex-col md:flex-row flex-wrap bg-white mr-2 md:mr-0 py-3 px-2">
                     <div>
                         <p className="text-sm mb-1">Employee Name/Code</p>
-                        <div className='flex items-center'>
+                        <div className='flex items-center mr-8'>
                             <PersonIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
-                            <input type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} value={searchTerm} onChange={handleSearchInputChange}
+                            <input type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-full md:w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} value={searchTerm} onChange={handleSearchInputChange}
                             />
                             {showOptions && (
                                 <ul
@@ -95,11 +95,11 @@ const Index = () => {
                             )}
                         </div>
                     </div>
-                    <div className='mx-8'>
+                    <div className='md:mx-8 mr-8 mt-3 md:mt-0 '>
                         <p className="text-sm mb-1">Lead Type</p>
                         <div className='flex items-center'>
                             <LocationOnIcon className="px-1 py-1 bg-gray-300 text-gray-700" style={{ border: "1px solid #ccc" }} />
-                            <select type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
+                            <select type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-full md:w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
                                 <option selected disabled>Select Lead Type</option>
                                 <option value="Hot">Hot</option>
                                 <option value="Cold">Cold</option>
@@ -107,15 +107,15 @@ const Index = () => {
                             </select>
                         </div>
                     </div>
-                    <div className='mr-8'>
+                    <div className='mr-8 mt-2 md:mt-0'>
                         <p className="text-sm mb-1">Date</p>
                         <div className='flex items-center'>
-                            <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
+                            <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-full md:w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
                             <button className="bg-gray-300 text-gray-700 px-3 py-[0.8px]">To</button>
-                            <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
+                            <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-full md:w-[150px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
                         </div>
                     </div>
-                    <div className='mr-8 flex-1'>
+                    <div className='mr-8 flex-1 mt-2 md:mt-0'>
                         <p className="text-sm mb-1">Presets</p>
                         <select type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[100%]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} >
                             <option selected disabled>Presets</option>
@@ -124,12 +124,12 @@ const Index = () => {
                     <div>
                     </div>
                 </div>
-                <div className='flex items-end h-full py-3 px-2'>
+                <div className='h-full py-3 px-2 sm:w-full md:w-2'>
                     <button className="bg-blue-600 rounded-md text-white py-[0] px-3 h-[30px]">Filter</button>
                 </div>
             </div>
             <ProductivityDialog open={open} setOpen={setOpen} show={show} setShow={setShow} />
-            { show && <ProductivityTable/> }
+            {show && <ProductivityTable />}
         </div>
     )
 }

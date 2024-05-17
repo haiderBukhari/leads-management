@@ -338,12 +338,10 @@ export default function ProductivityTable() {
         <Box sx={{ width: "auto" }} className="m-[10px] md:m-[10px] mt-[20px]">
             <div className='flex justify-between flex-wrap items-center'>
                 <div className='mt-4 h-[40px] border-b-2 border-gray-300 flex items-start'>
-                    <input type='text' placeholder='Search Lead' className='border-gray-300 pl-3' style={{ border: "1px solid #ccc" }} />
-                    <SearchIcon className="bg-gray-300 text-gray-700 p-1" />
                 </div>
                 <div className='flex items-center'>
                     <div className='mt-4 h-[40px] border-b-2 border-gray-300 flex items-start'>
-                        <FormControl style={{ maxWidth: '400px' }}>
+                        <FormControl className='max-w-[200px] md:max-w-[400px]' style={{ width: "auto" }}>
                             <Select
                                 multiple
                                 value={selectedColumns}
@@ -359,41 +357,6 @@ export default function ProductivityTable() {
                             </Select>
                         </FormControl>
                     </div>
-                    <select onChange={(e) => {
-                        if (e.target.value === 'role') {
-                            if (!selected.length) {
-                                e.target.value = "";
-                                return failedToast("Select Users to Change/Assign there Role");
-                            }
-                            setOpen(true);
-                        } else if (e.target.value === 'owner') {
-                            if (!selected.length) {
-                                e.target.value = "";
-                                return failedToast("Select Users to Change/Assign Owner");
-                            }
-                            const temprole = selectedFull[0].role;
-                            for (const users of selectedFull) {
-                                if (!userDetails.isAdmin) {
-                                    if (users.role === userDetails.isGeneralManager ? "General Manager" : userDetails.isManager ? 'Manager' : userDetails.isEmployee ? 'Employee' : '') {
-                                        return failedToast(`You dont have permission to assign ${users.role}`);
-                                    }
-                                }
-                                else if (users.role !== temprole) {
-                                    e.target.value = "";
-                                    return failedToast("Select the users with the same role");
-                                }
-                            }
-                            setOwnerType(temprole);
-                            setOpen1(!open1);
-                        }
-                        e.target.value = "";
-                    }} className='bg-gray-200 max-w-[140px] px-2 h-[40px] outline-none'>
-                        <option value=''>Activity</option>
-                        {
-                            userDetails.isAdmin && <option value='role'>Assign/ Change Role</option>
-                        }
-                        <option value='owner'>Assign/ Change Owner</option>
-                    </select>
                 </div>
             </div>
             <Paper sx={{ width: '100%', mb: 2 }}>

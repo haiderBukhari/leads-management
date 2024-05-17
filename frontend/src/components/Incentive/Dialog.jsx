@@ -1,21 +1,19 @@
 import AddIcon from '@mui/icons-material/Add';
-// import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
-// import { useSelector } from 'react-redux';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button, DialogActions } from '@mui/material';
-// import MultiSelect from './SelectBar';
 
-export default function AdvanceSearchDialog({ open, setOpen, show, setShow }) {
+export default function AdvanceSearchDialog({ open, setOpen, searchData, setSearchData, isAnd, setIsAnd }) {
     const [searchTerm, setSearchTerm] = React.useState("");
     const [secondarySearchTerm, setsecondarySearchTerm] = React.useState("");
 
     const handleSubmit = async () => {
         setOpen(false);
-        setShow(true);
     }
+
+    const [selectedItems, setSelectedItems] = React.useState([]);
 
     const searchList = [
         "Property",
@@ -33,9 +31,6 @@ export default function AdvanceSearchDialog({ open, setOpen, show, setShow }) {
         "SPA Stage",
         "No of Parkings",
         "Purpose of Purchase",
-        "SPA Stage",
-        "SPA Stage",
-        "SPA Stage",
     ];
 
     const propertyType = [
@@ -45,44 +40,42 @@ export default function AdvanceSearchDialog({ open, setOpen, show, setShow }) {
         "Shop",
         "Office",
         "Others"
-    ]
+    ];
 
     const property = [
         "Residential",
         "Commercial",
         "Land"
-    ]
+    ];
+
+    const purposeOfPurchase = [
+        "End Use",
+        "Investment"
+    ];
+
+    const dldStatus = [
+        "Paid",
+        "Not Paid"
+    ];
+
+    const spaStage = [
+        "Signed",
+        "Not Signed"
+    ];
 
     const [addList, setAddList] = React.useState([]);
     const [tempSelected, setTempSelected] = React.useState({ 'type': 'Lead Activity', 'value': '', 'isPresent': 'Is' });
     const [selectedColumn, setSelectedColumn] = React.useState(null);
-    const [isAnd, setIsAnd] = React.useState(true);
+    const [tempselectedString, setTempSelectedString] = React.useState("");
 
-    React.useEffect(() => {
-        console.log(addList)
-    }, [addList])
-    // Filter options based on search term
-    // const filterResult = (search, show) => {
-    //     const filtered = searchList.filter(option =>
-    //         option.toLowerCase().includes(search.toLowerCase())
-    //     );
-    //     if (show) {
-    //         setShowOptions(search !== '');
-    //     }
-    //     setFilteredOptions(filtered);
-    // }
 
-    // const handleSearchInputChange = (e) => {
-    //     const inputValue = e.target.value;
-    //     setSearchTerm(inputValue); // Show options only if input value is not empty
-    //     filterResult(inputValue, true)
-    // };
-
-    // const handleOptionClick = (option) => {
-    //     setSearchTerm(option);
-    //     setShowOptions(false);
-    //     setFilteredOptions([]);
-    // }
+    const handleChange = (key, value) => {
+        setSearchData(prevData => ({
+            ...prevData,
+            [key]: value
+        }));
+        console.log({ ...searchData, [key]: value })
+    };
 
     return (
         <React.Fragment>
@@ -105,44 +98,67 @@ export default function AdvanceSearchDialog({ open, setOpen, show, setShow }) {
                                     setSearchTerm(e.target.value);
                                     if (e.target.value === 'Property Type') {
                                         setSelectedColumn(propertyType);
+                                        setTempSelectedString("Property Type");
                                     } else if (e.target.value === 'Property') {
                                         setSelectedColumn(property);
+                                        setTempSelectedString("Property");
+                                    } else if (e.target.value === 'Purpose of Purchase') {
+                                        setSelectedColumn(purposeOfPurchase);
+                                        setTempSelectedString("Purpose of Purchase");
+                                    } else if (e.target.value === 'DLD Status') {
+                                        setSelectedColumn(dldStatus);
+                                        setTempSelectedString("DLD Status");
+                                    } else if (e.target.value === 'SPA Stage') {
+                                        setSelectedColumn(spaStage);
+                                        setTempSelectedString("SPA Stage");
+                                    } else {
+                                        setTempSelectedString(e.target.value);
                                     }
                                     const tempSelectedItem = { ...tempSelected };
                                     tempSelectedItem["key"] = e.target.value;
                                     setTempSelected(tempSelectedItem);
                                 }}>
                                 <option value='' key='' disabled selected={searchTerm === ''}>Select the Filter</option>
-                                {
-                                    searchList.map((Item) => {
-                                        return <option value={Item} key={Item}>{Item}</option>
-                                    })
-                                }
+                                {searchList.map((Item) => (
+                                    !selectedItems.includes(Item) && (
+                                        <option value={Item} key={Item}>{Item}</option>
+                                    )
+                                ))}
+
                             </select>
                             {
-                                <select className="w-[250px] outline-none mt-4 text-black text-sm px-2 h-[40px]"
-                                    style={{ border: "1px solid #ccc" }} onChange={(e) => {
+                                (tempselectedString === 'Property Type' || tempselectedString === 'Property' || tempselectedString === 'Purpose of Purchase' || tempselectedString === 'DLD Status' || tempselectedString === 'SPA Stage') ?
+                                    <select className="w-[250px] outline-none mt-4 text-black text-sm px-2 h-[40px]"
+                                        style={{ border: "1px solid #ccc" }} onChange={(e) => {
+                                            setsecondarySearchTerm(e.target.value);
+                                            const tempSelectedItem = { ...tempSelected };
+                                            tempSelectedItem["value"] = e.target.value;
+                                            setTempSelected(tempSelectedItem);
+                                        }}>
+                                        <option value='' key='' disabled selected={secondarySearchTerm === ''}>Select</option>
+                                        {
+                                            selectedColumn?.map((Item) => {
+                                                return <option value={Item} key={Item}>{Item}</option>
+                                            })
+                                        }
+                                    </select> : <input type="text" onChange={(e) => {
                                         setsecondarySearchTerm(e.target.value);
                                         const tempSelectedItem = { ...tempSelected };
                                         tempSelectedItem["value"] = e.target.value;
                                         setTempSelected(tempSelectedItem);
-                                    }}>
-                                    <option value='' key='' disabled selected={secondarySearchTerm === ''}>Select</option>
-                                    {
-                                        selectedColumn?.map((Item) => {
-                                            return <option value={Item} key={Item}>{Item}</option>
-                                        })
-                                    }
-                                </select>
+                                    }} placeholder={tempselectedString} className="w-[250px] outline-none mt-4 text-black text-sm px-2 h-[40px]" style={{ border: "1px solid #ccc" }} cols='30' rows='10' />
                             }
                             <div className='mt-6'>
                                 <button onClick={() => {
+                                    if (!tempSelected?.key || !tempSelected?.value) { alert("Please select the filter and its value"); return; }
                                     const addList1 = [...addList];
                                     addList1.push(tempSelected);
+                                    handleChange(tempSelected.key, tempSelected.value); // Update searchData
                                     setTempSelected({ 'key': '', 'value': '' });
                                     setsecondarySearchTerm('');
                                     setSearchTerm('');
                                     setAddList(addList1);
+                                    setSelectedItems([...selectedItems, tempSelected.key]);
                                 }} className="w-[80px] px-3 py-1 text-sm font-semibold bg-gray-700 text-white"><AddIcon className="text-white p-1" /> Add</button>
                                 <button className="w-[80px] ml-3 px-3 py-1 mt-1 text-sm font-semibold bg-transparent text-gray-800" style={{ border: "1px solid #ccc" }}>Reset</button>
                             </div>
@@ -167,16 +183,17 @@ export default function AdvanceSearchDialog({ open, setOpen, show, setShow }) {
                                             <div className='flex justify-between w-full'>
                                                 <p>{Item.key} is {Item.value}</p>
                                                 <DeleteIcon onClick={() => {
-                                                    const addList = [...setAddList];
-                                                    addList.splice(index, 1);
-                                                    setAddList(addList);
+                                                    const newList = [...addList];
+                                                    newList.splice(index, 1);
+                                                    setAddList(newList);
+                                                    const selectedItems1 = selectedItems.filter((item) => item !== Item.key); // Use Item.key to filter out the selected item
+                                                    setSelectedItems(selectedItems1);
                                                 }} className="cursor-pointer text-gray-700 " />
                                             </div>
                                         </div>
                                     ))
                                 }
                             </div>
-                            {/* Additional content in the right section */}
                         </div>
                     </div>
                 </div>
@@ -190,40 +207,3 @@ export default function AdvanceSearchDialog({ open, setOpen, show, setShow }) {
         </React.Fragment>
     );
 }
-
-// <div>
-// <div className="flex">
-//     <input
-//         type="text"
-//         placeholder="Type to Search"
-//         value={searchTerm}
-//         className="w-[230px] outline-none text-black text-sm px-2 py-2"
-//         style={{ border: "1px solid #ccc", borderRight: "none" }}
-//         onChange={handleSearchInputChange}
-//     />
-//     <ArrowDropDownIcon
-//         onClick={() => {
-//             setShowOptions(!showOptions);
-//             filterResult(searchTerm, false);
-//         }}
-//         style={{ border: "1px solid #ccc", borderLeft: "none", height: "40" }}
-//         className="bg-white w-[20px] h-[auto] text-gray-700 cursor-pointer"
-//     />
-// </div>
-// {showOptions && (
-//     <ul
-//         className="options-list absolute bg-white w-[254px] max-h-[200px] overflow-auto px-2"
-//         style={{ border: "1px solid #ccc", zIndex: 1000, boxShadow: "2px 2px 6px #ccc -2px -2px 10px #ccc" }}
-//     >
-//         {filteredOptions.map((option) => (
-//             <li
-//                 key={option}
-//                 className="cursor-default hover:opacity-60"
-//                 onClick={() => handleOptionClick(option)}
-//             >
-//                 {option}
-//             </li>
-//         ))}
-//     </ul>
-// )}
-// </div>

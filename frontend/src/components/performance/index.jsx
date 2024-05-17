@@ -67,12 +67,12 @@ const Index = () => {
                     </div>
                     <div>
                         <p className="text-sm mb-1">Employee Name/Code</p>
-                        <div className='flex items-center relative h-full'>
+                        <div className='flex justify-center relative h-full w-full'>
                             <PersonIcon className="px-2 py-1 bg-gray-300 text-gray-700 h-[90px]" style={{ border: "1px solid #ccc", height: "35px", width: "35px" }} />
-                            <input type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[200px] h-[35px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} value={searchTerm} onChange={handleSearchInputChange}/>
+                            <input type='text' placeholder='Select Employee' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[300px] h-[35px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} value={searchTerm} onChange={handleSearchInputChange} />
                             {showOptions && (
                                 <ul
-                                    className="options-list absolute bg-white w-[235px] max-h-[200px] overflow-auto px-2"
+                                    className="options-list absolute bg-white w-[335px] max-h-[200px] overflow-auto px-2"
                                     style={{ border: "1px solid #ccc", zIndex: 1000, boxShadow: "2px 2px 6px #ccc -2px -2px 10px #ccc", top: "34px" }}
                                 >
                                     {filteredOptions.map((option) => (
@@ -88,14 +88,20 @@ const Index = () => {
                             )}
                         </div>
                     </div>
+
                     <div className='mx-8'>
+                        <p className="text-sm mb-1">STS ID</p>
+                        <input type='text' disabled className="text-sm placeholder:px-1 outline-none text-gray-700 w-[300px] h-[35px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
+                    </div>
+
+                    {/* <div className='mx-8'>
                         <p className="text-sm mb-1">Date</p>
                         <div className='flex items-center'>
                             <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[200px] h-[35px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
                             <button className="bg-gray-300 text-gray-700 px-3 py-[0.8px] h-[35px]">To</button>
                             <input type='date' className="text-sm placeholder:px-1 outline-none text-gray-700 w-[200px] h-[35px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
                         </div>
-                    </div>
+                    </div> */}
                     <div>
                     </div>
                 </div>

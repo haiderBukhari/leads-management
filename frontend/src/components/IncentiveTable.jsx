@@ -106,7 +106,7 @@ EnhancedTableHead.propTypes = {
     selectedColumns: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-export default function IncentiveTable({filteration, fetchData, setFetchData}) {
+export default function IncentiveTable({filteration, fetchData, setFetchData, searchData, isAnd}) {
     const [selectedColumns, setSelectedColumns] = useState(['id', 'name', 'creationDate', 'creatorName', 'bspTotal', 'action']);
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('name');
@@ -116,14 +116,12 @@ export default function IncentiveTable({filteration, fetchData, setFetchData}) {
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
     const [open1, setOpen1] = useState(false);
-    const [role, setRole] = useState("all");
-    const [type, setType] = useState("all");
     const [ownerType, setOwnerType] = useState('');
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
     const userDetails = useSelector((state) => state.authentication);
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/deal?segment=${filteration.segment}&closureDate=${filteration.closureDate}&channel=${filteration.channel}&saleType=${filteration.saleType}`, {
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/deal?segment=${filteration.segment}&closureDate=${filteration.closureDate}&channel=${filteration.channel}&saleType=${filteration.saleType}&searchData=${JSON.stringify(searchData)}&logic=${isAnd ? 'and': 'or'}`, {
             headers: {
                 'Authorization': `Bearer ${jwtToken}`
             }
