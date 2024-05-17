@@ -113,6 +113,7 @@ export const CreateDeal = () => {
             },
         })
             .then(() => {
+                Navigate('/incentive')
                 successToast('Deal Created!')
             })
             .catch(error => {
@@ -257,7 +258,7 @@ export const CreateDeal = () => {
                         <div className="mt-5 flex flex-wrap">
                             <div className="flex flex-col mr-7 relative">
                                 <label className="text-sm font-medium mb-1">Lead Name*</label>
-                                <input type='text' placeholder="Lead Name" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={formData.name} onChange={handleSearchInputChange} disabled={id ? true : false} />
+                                <input type='text' placeholder="Lead Name" className="w-[250px] outline-none text-black text-sm px-2 h-[40px] bg-[#f4f4f4] placeholder:text-black" style={{ border: "1px solid #D2D6DE" }} value={searchTerm || formData.name} onChange={handleSearchInputChange} disabled={id ? true : false} />
                                 {showOptions && (
                                     <ul className="options-list absolute bg-white w-[250px] max-h-[200px] overflow-auto px-2" style={{ border: "1px solid #ccc", zIndex: 1000, boxShadow: "2px 2px 6px #ccc -2px -2px 10px #ccc", top: "63px" }}
                                     >

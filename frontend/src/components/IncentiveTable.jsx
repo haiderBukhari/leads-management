@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,14 +12,12 @@ import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
 import Box from '@mui/material/Box';
-import SearchIcon from '@mui/icons-material/Search';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
 import { Input } from '@mui/material';
 import RoleSelectionDialog from '../components/UserType';
-import { failedToast, successToast } from '../utils/ToastsNotifications';
 import AssignOwnerDialog from '../components/AssignOwner';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -118,7 +116,6 @@ export default function IncentiveTable({filteration, fetchData, setFetchData, se
     const [open1, setOpen1] = useState(false);
     const [ownerType, setOwnerType] = useState('');
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
-    const userDetails = useSelector((state) => state.authentication);
 
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/deal?segment=${filteration.segment}&closureDate=${filteration.closureDate}&channel=${filteration.channel}&saleType=${filteration.saleType}&searchData=${JSON.stringify(searchData)}&logic=${isAnd ? 'and': 'or'}`, {
@@ -201,8 +198,6 @@ export default function IncentiveTable({filteration, fetchData, setFetchData, se
         <Box sx={{ width: "auto" }} className="m-[10px] md:m-[10px] mt-[20px]">
             <div className='flex justify-between flex-wrap items-center'>
                 <div className='mt-4 h-[40px] border-b-2 border-gray-300 flex items-start'>
-                    <input type='text' placeholder='Search Lead' className='border-gray-300 pl-3' style={{ border: "1px solid #ccc" }} />
-                    <SearchIcon className="bg-gray-300 text-gray-700 p-1" />
                 </div>
                 <div className='flex items-center'>
                     <div className='mt-4 h-[40px] border-b-2 border-gray-300 flex items-start'>
@@ -222,41 +217,6 @@ export default function IncentiveTable({filteration, fetchData, setFetchData, se
                             </Select>
                         </FormControl>
                     </div>
-                    <select onChange={(e) => {
-                        if (e.target.value === 'role') {
-                            if (!selected.length) {
-                                e.target.value = "";
-                                return failedToast("Select Users to Change/Assign their Role");
-                            }
-                            setOpen(true);
-                        } else if (e.target.value === 'owner') {
-                            if (!selected.length) {
-                                e.target.value = "";
-                                return failedToast("Select Users to Change/Assign Owner");
-                            }
-                            const temprole = rows.find(row => row.id === selected[0]).role;
-                            for (const id of selected) {
-                                const userRole = rows.find(row => row.id === id).role;
-                                if (!userDetails.isAdmin) {
-                                    if (userRole === userDetails.isGeneralManager ? "General Manager" : userDetails.isManager ? 'Manager' : userDetails.isEmployee ? 'Employee' : '') {
-                                        return failedToast(`You don't have permission to assign ${userRole}`);
-                                    }
-                                } else if (userRole !== temprole) {
-                                    e.target.value = "";
-                                    return failedToast("Select the users with the same role");
-                                }
-                            }
-                            setOwnerType(temprole);
-                            setOpen1(!open1);
-                        }
-                        e.target.value = "";
-                    }} className='bg-gray-200 max-w-[140px] px-2 h-[40px] outline-none'>
-                        <option value=''>Activity</option>
-                        {
-                            userDetails.isAdmin && <option value='role'>Assign/Change Role</option>
-                        }
-                        <option value='owner'>Assign/Change Owner</option>
-                    </select>
                 </div>
             </div>
             <Paper sx={{ width: '100%', mb: 2 }}>

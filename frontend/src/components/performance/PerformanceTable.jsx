@@ -84,7 +84,7 @@ const headCells = [
         id: 'property',
         numeric: false,
         disablePadding: false,
-        label: 'GTV',
+        label: 'cnt GTV',
     },
     {
         id: 'email',
@@ -220,9 +220,10 @@ export default function PerformanceTable() {
     const [rows, setRows] = useState([]); // State to hold the rows of the table
     const [fetchData, setFetchData] = useState(false);
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
+    const userId = useSelector((state) => state.authentication.userId);
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/leads`, {
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/performance/${userId}`, {
             headers: {
                 'Authorization': `Bearer ${jwtToken}`
             }
@@ -230,23 +231,21 @@ export default function PerformanceTable() {
             .then(response => {
                 const dataFromBackend = response.data;
                 const formattedRows = dataFromBackend.map(item =>
-                    // function createData(id, phone, stage, score, activity, activity_date, owner, modifiedDate, date, source, property, email) {
-                    createData(
+                    // function createData(id, name, phone, stage, score, activity, activity_date, owner, modifiedDate, date, source, property, email, crt, cnt) {
+                        createData(
                         item._id,
                         item.name,
                         '-',
                         '-',
+                        item.crtDeals,
+                        item.countDeals,
                         '-',
                         '-',
                         '-',
                         '-',
                         '-',
                         '-',
-                        '-',
-                        '-',
-                        '-',
-                        '-',
-                        '-',
+                        item.invoiceDeals,
                     )
                 );
                 setRows(formattedRows);

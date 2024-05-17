@@ -9,13 +9,12 @@ import IncentiveTable from '../IncentiveTable';
 
 const Index = () => {
     const [open, setOpen] = useState(false);
-    const [change, setChange] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredOptions, setFilteredOptions] = useState([]);
     const [showOptions, setShowOptions] = useState(false);
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
     const [searchList, setSearchList] = useState([]);
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(true);
     const [isAnd, setIsAnd] = useState(true);
     const [searchData, setSearchData] = useState({
         "Property": "",

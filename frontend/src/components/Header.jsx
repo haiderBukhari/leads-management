@@ -9,15 +9,16 @@ const Header = () => {
     const disptch = useDispatch();
     const userDetails = useSelector((state) => state.authentication);
     const data = useSelector((state) => state.authentication);
+
     return (
         <div className="h-[60px] w-full bg-gray-800 flex justify-between items-center">
             <div className="px-4 py-2 w-full flex justify-between items-center relative">
                 <img className="h-[40px] mr-4" src='/assets/logo.png' alt="Logo" />
                 <div className="relative flex w-full justify-end">
                     <Link to="/create/deal" className='text-white text-sm  mr-3'>Create Deal</Link>
-                    <Link to="/performance" className='text-sm text-white mr-3'>Performance Dashboard</Link>
+                    { !data.isEmployee && <Link to="/performance" className='text-sm text-white mr-3'>Performance Dashboard</Link> }
                     <Link to="/incentive" className='text-white text-sm  mr-3'>Incentive Dashboard</Link>
-                    <Link to="/productivty" className='text-white text-sm  mr-3'>Productivity Dashboard</Link>
+                    { !data.isEmployee && <Link to="/productivty" className='text-white text-sm  mr-3'>Productivity Dashboard</Link>}
                     <Link to="/LeadManagement" className='text-white text-sm  mr-3'>Leads Dashboard</Link>
                     <div style={{borderRight: "1px solid #ccc"}} className='mx-4'></div>
                     <div className="group">
