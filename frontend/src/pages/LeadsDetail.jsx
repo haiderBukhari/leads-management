@@ -377,7 +377,7 @@ const LeadsDetail = () => {
                                                         <option selected={userData[Item] === 'Native'} value='Native' key=''>Native</option>
                                                         <option selected={userData[Item] === 'UAE'} value='UAE' key=''>UAE</option>
                                                         <option selected={userData[Item] === 'Other'} value='Others' key=''>Others</option>
-                                                    </select>: <select onChange={(e) => setUserData({ ...userData, [Item]: e.target.value })} className='ml-2 w-[50%] text-sm outline-none px-2 py-1 flex-1 text-gray-500' style={{ border: "1px solid #ccc", padding: "0 5px", outline: "none", borderRadius: "3px" }}>
+                                                    </select> : <select onChange={(e) => setUserData({ ...userData, [Item]: e.target.value })} className='ml-2 w-[50%] text-sm outline-none px-2 py-1 flex-1 text-gray-500' style={{ border: "1px solid #ccc", padding: "0 5px", outline: "none", borderRadius: "3px" }}>
                                                         <option selected={userData[Item] === ''} value='' key=''>Family Status</option>
                                                         <option selected={userData[Item] === 'Here'} value='Here' key=''>Here</option>
                                                         <option selected={userData[Item] === 'Native'} value='Native' key=''>Native</option>
@@ -400,39 +400,50 @@ const LeadsDetail = () => {
                         }
                         {
                             selectedData === 3 &&
-                            leadsData?.notes?.map((Item) => {
-                                const itemDate = new Date(Item.date);
-                                const today = new Date();
-                                const yesterday = new Date(today);
-                                yesterday.setDate(yesterday.getDate() - 1);
+                            <>
+                                <div onClick={() => { setAddNote(!addNote) }} className="flex items-center p-3 w-[200px] mx-auto bg-blue-400 text-white" style={{ border: "1px solid #ccc", borderRadius: "7px" }}>
+                                    <label htmlFor="fileInput" style={{ cursor: "pointer" }}>
+                                        <EditNoteOutlinedIcon className="mr-3" />
+                                        Create new Notes
+                                    </label>
+                                </div>
+                                {
 
-                                let dateString;
-                                if (itemDate.toDateString() === today.toDateString()) {
-                                    dateString = 'Today';
-                                } else if (itemDate.toDateString() === yesterday.toDateString()) {
-                                    dateString = 'Yesterday';
-                                } else {
-                                    dateString = itemDate.toLocaleDateString();
-                                }
-                                return (
-                                    <div key={Item.date} className='bg-white w-[100%] h-[100px] mt-3 pt-4 pl-7 flex'>
-                                        <div className='text-sm text-gray-700 leading-6'>
-                                            <p>{dateString}</p>
-                                            <p>{Item.date.slice(11, 16)}</p>
-                                        </div>
-                                        <div className="bg-blue-600 flex justify-center items-center w-[35px] h-[35px] rounded-full ml-5 relative">
-                                            <NotesIcon className='text-white' />
-                                        </div>
-                                        <div className='text-sm text-gray-700 leading-6 ml-5  flex flex-col'>
-                                            <div className='flex'>
-                                                <KeyboardArrowRightIcon className="text-blue-600" />
-                                                <p className='text-blue-600 font-semibold'>{Item.message}</p>
+                                    leadsData?.notes?.map((Item) => {
+                                        const itemDate = new Date(Item.date);
+                                        const today = new Date();
+                                        const yesterday = new Date(today);
+                                        yesterday.setDate(yesterday.getDate() - 1);
+
+                                        let dateString;
+                                        if (itemDate.toDateString() === today.toDateString()) {
+                                            dateString = 'Today';
+                                        } else if (itemDate.toDateString() === yesterday.toDateString()) {
+                                            dateString = 'Yesterday';
+                                        } else {
+                                            dateString = itemDate.toLocaleDateString();
+                                        }
+                                        return (
+                                            <div key={Item.date} className='bg-white w-[100%] h-[100px] mt-3 pt-4 pl-7 flex'>
+                                                <div className='text-sm text-gray-700 leading-6'>
+                                                    <p>{dateString}</p>
+                                                    <p>{Item.date.slice(11, 16)}</p>
+                                                </div>
+                                                <div className="bg-blue-600 flex justify-center items-center w-[35px] h-[35px] rounded-full ml-5 relative">
+                                                    <NotesIcon className='text-white' />
+                                                </div>
+                                                <div className='text-sm text-gray-700 leading-6 ml-5  flex flex-col'>
+                                                    <div className='flex'>
+                                                        <KeyboardArrowRightIcon className="text-blue-600" />
+                                                        <p className='text-blue-600 font-semibold'>{Item.message}</p>
+                                                    </div>
+                                                    <p className='text-sm ml-6 mt-2'>Added by System on {Item.date.slice(11, 16)}</p>
+                                                </div>
                                             </div>
-                                            <p className='text-sm ml-6 mt-2'>Added by System on {Item.date.slice(11, 16)}</p>
-                                        </div>
-                                    </div>
-                                );
-                            })
+                                        );
+                                    })
+                                }
+                            </>
                         }
                         {
                             selectedData === 4 && <div>

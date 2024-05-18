@@ -236,16 +236,16 @@ export default function ProductivityTable() {
                         item._id,
                         item.name,
                         item.phone,
-                        'Prospect',
+                        item.stage,
                         item.leadScore,
-                        '-',
-                        '-',
+                        item.leadActivity,
+                        item.leadActivityDate,
                         item.employeeName ? item.employeeName : item.managerName ? item.managerName : item.generalManagerName ? item.generalManagerName : '-',
                         // '-',
                         item.createdAt,
                         item.createdAt,
                         item.source,
-                        '-',
+                        item.meetingDetails[item.meetingDetails.length-1]?.productPitched,
                         item.email
                     )
                 );
@@ -388,6 +388,7 @@ export default function ProductivityTable() {
                                         tabIndex={-1}
                                         key={row.id}
                                         selected={isItemSelected}
+                                        className={index%2!=0 ? 'bg-gray-100' : ''}
                                         sx={{ cursor: 'default' }}
                                     >
                                         <TableCell padding="checkbox">
@@ -424,13 +425,13 @@ export default function ProductivityTable() {
                                                     case 'activity':
                                                         return <TableCell key={column.id} align="left">{row.activity}</TableCell>;
                                                     case 'activity_date':
-                                                        return <TableCell key={column.id} align="left">{row.activity_date}</TableCell>;
+                                                        return <TableCell key={column.id} align="left">{row.activity_date?.slice(0, 10)}</TableCell>;
                                                     case 'owner':
                                                         return <TableCell key={column.id} align="left">{row.owner}</TableCell>;
                                                     case 'modifiedDate':
-                                                        return <TableCell key={column.id} align="left">{row.modifiedDate}</TableCell>;
+                                                        return <TableCell key={column.id} align="left">{row.modifiedDate?.slice(0, 10)}</TableCell>;
                                                     case 'date':
-                                                        return <TableCell key={column.id} align="left">{row.date}</TableCell>;
+                                                        return <TableCell key={column.id} align="left">{row.date?.slice(0, 10)}</TableCell>;
                                                     case 'source':
                                                         return <TableCell key={column.id} align="left">{row.source}</TableCell>;
                                                     case 'property':

@@ -244,6 +244,7 @@ export default function IncentiveTable({filteration, fetchData, setFetchData, se
                                         tabIndex={-1}
                                         key={row.id}
                                         selected={isItemSelected}
+                                        className={index%2!=0 ? 'bg-gray-100' : ''}
                                         sx={{ cursor: 'default' }}
                                     >
                                         <TableCell padding="checkbox">

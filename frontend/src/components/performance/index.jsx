@@ -10,8 +10,10 @@ const Index = () => {
     const [showOptions, setShowOptions] = useState(false);
     const jwtToken = useSelector((state) => state.authentication.jwtToken);
     const [searchList, setSearchList] = useState([]);
+    const [fetchAgain, setFetchAgain] = useState(false);
     const [change, setChange] = useState(true);
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(true);
+    const [selectedLead, setSelectedLead] = useState({});
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -21,8 +23,7 @@ const Index = () => {
                         'Authorization': `Bearer ${jwtToken}`
                     },
                 }).then((response) => {
-                    const res = response.data.map(Item => Item.name)
-                    setSearchList(res)
+                    setSearchList(response.data)
                 })
             } catch (error) {
                 console.error(error);
@@ -32,24 +33,24 @@ const Index = () => {
         fetchData();
     }, [searchTerm])
     const filterResult = (search, show) => {
-        console.log(searchList);
         const filtered = searchList && searchList?.filter(option =>
-            option.toLowerCase().includes(search.toLowerCase())
+            option.name.toLowerCase().includes(search.toLowerCase())
         )
         if (show) {
             setShowOptions(search !== '');
         }
         setFilteredOptions(filtered || []);
     }
-
+    
     const handleSearchInputChange = (e) => {
         const inputValue = e.target.value;
+        setSelectedLead({userId: ''})
         setSearchTerm(inputValue); // Show options only if input value is not empty
         filterResult(inputValue, true)
     };
-
     const handleOptionClick = (option) => {
-        setSearchTerm(option);
+        setSearchTerm(option.name);
+        setSelectedLead(option)
         setShowOptions(false);
         setFilteredOptions([]);
     }
@@ -79,7 +80,7 @@ const Index = () => {
                                             className="cursor-default hover:opacity-60"
                                             onClick={() => handleOptionClick(option)}
                                         >
-                                            {option}
+                                            {option.name}
                                         </li>
                                     ))}
                                 </ul>
@@ -89,7 +90,7 @@ const Index = () => {
 
                     <div className='md:mx-8 mt-3 md:mt-0'>
                         <p className="text-sm mb-1">STS ID</p>
-                        <input type='text' disabled className="text-sm placeholder:px-1 outline-none text-gray-700 w-[275px] h-[35px]" style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
+                        <input type='text' disabled className="text-sm placeholder:px-1 outline-none text-gray-700 w-[275px] h-[35px]" value={selectedLead?.userId} style={{ border: "1px solid #ccc", padding: "1px 5px" }} />
                     </div>
 
                     {/* <div className='mx-8'>
@@ -104,10 +105,10 @@ const Index = () => {
                     </div>
                 </div>
                 <div className='flex w-full md:w-auto items-start md:items-end h-full py-3 px-2'>
-                    <button onClick={() => { setShow(!show) }} className="bg-blue-600 rounded-md text-white py-[0] px-3 h-[30px]">Filter</button>
+                    <button onClick={() => { setFetchAgain(!fetchAgain) }} className="bg-blue-600 rounded-md text-white py-[0] px-3 h-[30px]">Filter</button>
                 </div>
             </div>
-            {show && <PerformanceTable />}
+            {show && <PerformanceTable selectedLead={selectedLead} fetchAgain={fetchAgain}/>}
         </div>
     )
 }

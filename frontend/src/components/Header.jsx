@@ -15,7 +15,9 @@ const Header = () => {
             <div className="px-4 py-2 w-full flex justify-between items-center relative">
                 <img className="h-[40px] mr-4" src='/assets/logo.png' alt="Logo" />
                 <div className="relative flex w-full justify-end">
-                    <Link to="/create/deal" className='text-white text-sm  mr-3'>Create Deal</Link>
+                    {
+                        !data.isAdmin && <Link to="/create/deal" className='text-white text-sm  mr-3'>Create Deal</Link>
+                    }
                     { !data.isEmployee && <Link to="/performance" className='text-sm text-white mr-3'>Performance Dashboard</Link> }
                     <Link to="/incentive" className='text-white text-sm  mr-3'>Incentive Dashboard</Link>
                     { !data.isEmployee && <Link to="/productivty" className='text-white text-sm  mr-3'>Productivity Dashboard</Link>}

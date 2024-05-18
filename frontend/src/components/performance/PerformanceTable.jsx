@@ -64,13 +64,13 @@ const headCells = [
     },
     {
         id: 'modifiedDate',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Cnt Act %',
     },
     {
         id: 'date',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: '% Achu',
     },
@@ -208,7 +208,7 @@ EnhancedTableHead.propTypes = {
 };
 
 
-export default function PerformanceTable() {
+export default function PerformanceTable({selectedLead, fetchAgain}) {
     // const Navigate = useNavigate();
     const [selectedColumns, setSelectedColumns] = useState(["name", "phone", "stage", "score", "activity", "activity_date", "owner", "modifiedDate", "date", 'source', "property", "email"]);
     const [order, setOrder] = React.useState('asc');
@@ -223,7 +223,7 @@ export default function PerformanceTable() {
     const userId = useSelector((state) => state.authentication.userId);
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/performance/${userId}`, {
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/performance/${userId}?selectedId=${selectedLead?._id || ""}`, {
             headers: {
                 'Authorization': `Bearer ${jwtToken}`
             }
@@ -235,16 +235,16 @@ export default function PerformanceTable() {
                         createData(
                         item._id,
                         item.name,
-                        '-',
-                        '-',
+                        item.team || 0,
+                        item.fos || 0,
                         item.crtDeals,
                         item.countDeals,
-                        '-',
-                        '-',
-                        '-',
-                        '-',
-                        '-',
-                        '-',
+                        !item.fos ? 0 : item.crtDeals / item.fos,
+                        !item.team ? 0 : (item.crtDeals / item.team) * 100,
+                        !item.team ? 0 : (item.countDeals / item.team) * 100,
+                        ((item.crtGTV/100000)*100).toPrecision(3),
+                        item.crtGTV,
+                        item.cntGTV,
                         item.invoiceDeals,
                     )
                 );
@@ -253,7 +253,7 @@ export default function PerformanceTable() {
             .catch(error => {
                 console.error('Error fetching data:', error);
             });
-    }, [fetchData]);
+    }, [fetchData, fetchAgain]);
 
 
     const handleRequestSort = (event, property) => {
@@ -346,6 +346,7 @@ export default function PerformanceTable() {
                                         tabIndex={-1}
                                         key={row.id}
                                         selected={isItemSelected}
+                                        className={index%2!=0 ? 'bg-gray-100' : ''}
                                         sx={{ cursor: 'default' }}
                                     >
                                         <TableCell padding="checkbox">

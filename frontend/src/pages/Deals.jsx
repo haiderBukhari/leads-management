@@ -233,6 +233,35 @@ export const CreateDeal = () => {
         }
     }
 
+    function validateUpdateRendering() {
+        if (userData.isAdmin) {
+            if (formData.isAdminApproved) {
+                return false;
+            }
+            return true;
+        }
+        else if (userData.isGeneralManager && formData.generalManagerId && formData.generalManagerId === userId) {
+            if (!formData.isGeneralManagerApproved) {
+                if (formData.managerId) {
+                    if (formData.isManagerApproved) {
+                        return true;
+                    }
+                    return false;
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+        else if (userData.isManager && formData.managerId && formData.managerId === userId) {
+            if (!formData.isManagerApproved) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     const finalDeal = async () => {
         await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/deal/${id}?userId=${userId}`, {
             headers: {
@@ -240,9 +269,24 @@ export const CreateDeal = () => {
                 'Authorization': `Bearer ${jwtToken}`
             },
         }).then(() => {
-                Navigate('/incentive')
-                successToast('Deal approved!')
-            })
+            Navigate('/incentive')
+            successToast('Deal approved!')
+        })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+
+    const updateDeal = async () => {
+        await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/deal/${id}`, formData, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`
+            },
+        }).then(() => {
+            setFetchAgain(!fetchAgain)
+            successToast('Deal updated!')
+        })
             .catch(error => {
                 console.error('Error fetching data:', error);
             });
@@ -687,11 +731,33 @@ export const CreateDeal = () => {
                         id ? formData.ownerId !== userId && validateRendering() && <div className="flex justify-end px-5">
                             <button onClick={finalDeal} className="bg-green-600 py-2 px-7 rounded-sm mt-5 text-white"> Final Deal</button>
                         </div> : <div className="flex justify-end px-5">
-                            <button onClick={createDeals} className="bg-[#F39C12] py-2 px-7 rounded-sm mt-5 text-white"> Create Deal</button>
+                            <button onClick={createDeals} className="bg-[#F39C12] py-2 px-7 rounded-sm mt-5 text-white">Create Deal</button>
+                        </div>
+                    }
+                    {
+                        <div className="flex items-center justify-between">
+                            {
+                                id && userData.isAdmin && (formData.dealStatus !== 'Pending' && formData.dealStatus !== 'Draft') && <div className="flex flex-row justify-between items-center w-full mx-8 mt-8">
+                                    <div className="flex flex-col">
+                                        <label className="text-sm font-medium mb-1">Deal Status</label>
+                                        <select onChange={(e) => { setFormData({ ...formData, dealStatus: e.target.value }) }} style={{ border: "1px solid #3C8DBC" }} className="w-[200px] outline-none text-black text-sm px-2 h-[40px] placeholder:text-black rounded-sm">
+                                            <option value='Created' key=''>Created</option>
+                                            <option value='Counted' key=''>Counted</option>
+                                            <option value='Invoiced' key=''>Invoiced</option>
+                                            <option value='Collected' key=''>Collected</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            }
+                            {
+                                validateUpdateRendering() && <div className="px-5">
+                                    <button onClick={updateDeal} className="bg-green-600 py-2 px-7 rounded-sm mt-5 text-white w-[150px]">Update Deal</button>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

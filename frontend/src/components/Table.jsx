@@ -332,6 +332,7 @@ export default function EnhancedTable({ open, setOpen }) {
                                         role="checkbox"
                                         aria-checked={isItemSelected}
                                         tabIndex={-1}
+                                        className={index%2!=0 ? 'bg-gray-100' : ''}
                                         key={row.id + + index * 100 + 287}
                                         selected={isItemSelected}
                                         sx={{ cursor: 'default' }}

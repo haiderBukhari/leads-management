@@ -124,7 +124,7 @@ const Index = () => {
                     <div>
                     </div>
                 </div>
-                <div className='h-full py-3 px-2 sm:w-full md:w-2'>
+                <div className='h-full py-3 px-2 w-full md:w-auto md:w-2'>
                     <button className="bg-blue-600 rounded-md text-white py-[0] px-3 h-[30px]">Filter</button>
                 </div>
             </div>
